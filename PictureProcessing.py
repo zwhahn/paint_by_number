@@ -22,24 +22,24 @@ lower_hsv2 = np.array([160, 100, 100])
 upper_hsv2 = np.array([179, 255, 255])
 
 # Define color dictionary (credit: Ari Hashemian https://stackoverflow.com/questions/36817133/identifying-the-range-of-a-color-in-hsv-using-opencv)
-color_dict_HSV = {'black': [[180, 255, 30], [0, 0, 0]],
-              'white': [[180, 18, 255], [0, 0, 231]],
-              'red1': [[180, 255, 255], [159, 50, 70]],
+color_dict_HSV = {'black': [[179, 255, 30], [0, 0, 0]],
+              'white': [[179, 18, 255], [0, 0, 231]],
+              'red1': [[179, 255, 255], [159, 50, 70]],
               'red2': [[9, 255, 255], [0, 50, 70]],
               'green': [[89, 255, 255], [36, 50, 70]],
               'blue': [[128, 255, 255], [90, 50, 70]],
               'yellow': [[35, 255, 255], [25, 50, 70]],
               'purple': [[158, 255, 255], [129, 50, 70]],
               'orange': [[24, 255, 255], [10, 50, 70]],
-              'gray': [[180, 18, 230], [0, 0, 40]]}
+              'gray': [[179, 18, 230], [0, 0, 40]]}
 
 
-# Generating mask
-lower_mask = cv.inRange(img, lower_hsv1, upper_hsv1)
-upper_mask = cv.inRange(img, lower_hsv2, upper_hsv2)
+# Generating red mask
+lower_mask = cv.inRange(img, np.array(color_dict_HSV['red1'][1]), np.array(color_dict_HSV['red1'][0]))
+upper_mask = cv.inRange(img, np.array(color_dict_HSV['red2'][1]), np.array(color_dict_HSV['red2'][0]))
 full_red_mask = lower_mask + upper_mask
 
-detected_img = cv.bitwise_and(img, img, mask = full_red_mask)
+red_detected_img = cv.bitwise_and(img, img, mask = full_red_mask)
 
 cv.imshow("Detected images", detected_img)
 
