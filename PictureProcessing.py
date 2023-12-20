@@ -2,9 +2,9 @@ import cv2 as cv
 import numpy as np
 
 # Load original image
-img = cv.imread("./pa_logo.png")
-# img = cv.imread("./golden_gate_bridge.jpg")
-cv.imshow("Display window", img)  # uncomment to view original image
+# img = cv.imread("./pa_logo.png")
+img = cv.imread("./golden_gate_bridge.jpg")
+cv.imshow("Display window", img)
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
@@ -34,13 +34,13 @@ cv.imshow('Simplified Image', img_simplified)
 
 '''EDGE DETECTION'''
 # Detect image edges
-edges = cv.Canny(img, 100, 200) 
-cv.imshow("Display window 2", edges)
+edges = cv.Canny(img_simplified, 100, 200) 
+cv.imshow("Simplified Image Edges", edges)
 
 # Overlay edges on original image
 edges_bgr = cv.cvtColor(edges, cv.COLOR_GRAY2BGR)  # convert edges to bgr
-overlay_img = img + edges_bgr
-cv.imshow("Image with Edge Detection", overlay_img)
+overlay_img = img_simplified + edges_bgr
+cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
 
 
 cv.waitKey(0)  # keep images open until any key is pressed
