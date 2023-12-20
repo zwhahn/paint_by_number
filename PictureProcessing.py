@@ -2,9 +2,9 @@ import cv2 as cv
 import numpy as np
 
 # Load original image
-# img = cv.imread("./pa_logo.png")
-img = cv.imread("./golden_gate_bridge.jpg")
-cv.imshow("Display window", img)
+img = cv.imread("./pa_logo.png")
+# img = cv.imread("./golden_gate_bridge.jpg")
+cv.imshow("Original image", img)
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
@@ -26,11 +26,13 @@ K = 3  # number of clusters (or colors)
 ret, label, center = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 # Convert back to uint8
-center = np.uint8(center)
+center = np.uint8(center)  # RGB values of the final clusters
+print(center)
 img_simplified = center[label.flatten()]
 img_simplified = img_simplified.reshape((img.shape))
 
-cv.imshow('Simplified Image', img_simplified)
+
+# cv.imshow('Simplified Image', img_simplified)
 
 '''EDGE DETECTION'''
 # Detect image edges
