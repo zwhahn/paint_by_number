@@ -24,10 +24,10 @@ ret, label, center = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RAN
 
 # Convert back to uint8
 center = np.uint8(center)
-res = center[label.flatten()]
-res2 = res.reshape((img.shape))
+img_simplified = center[label.flatten()]
+img_simplified = img_simplified.reshape((img.shape))
 
-cv.imshow('res2', res2)
+cv.imshow('Simplified Image', img_simplified)
 
 cv.imshow("Display window", img)
 k = cv.waitKey(0)
