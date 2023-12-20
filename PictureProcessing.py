@@ -12,5 +12,13 @@ This allows the k-means cluster algorithm to cluster similar colors
 together.'''  
 img_reshape = img.reshape((-1, 3))
 
+# Convert to float32
+img_reshape = np.float32(img_reshape)
+
+# Define criteria, number of clusters(K), and apply kmeans()
+'''cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
+cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1. '''
+criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max_iter
+
 cv.imshow("Display window", img)
 k = cv.waitKey(0)
