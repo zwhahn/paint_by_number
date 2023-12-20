@@ -8,8 +8,8 @@ def nothing(x):
     pass
 
 # Load in image
-image = cv2.imread("./color_circles.jpg")
-# image = cv2.imread("./pa_logo.png")
+# image = cv2.imread("./color_circles.jpg")
+image = cv2.imread("./pa_logo.png")
 
 # Create a window
 cv2.namedWindow('image')
