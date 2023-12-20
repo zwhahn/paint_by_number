@@ -1,8 +1,8 @@
 import cv2 as cv
 import numpy as np
 
-img = cv.imread("./pa_logo.png")
-# img = cv.imread("./golden_gate_bridge.jpg")
+# img = cv.imread("./pa_logo.png")
+img = cv.imread("./golden_gate_bridge.jpg")
 
 # Reshape the image to be a 2D array with 3 channels. 
 ''' The value -1 the number of rows needed is calculated 
