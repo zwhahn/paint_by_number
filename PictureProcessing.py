@@ -8,6 +8,8 @@ img = cv.imread("./golden_gate_bridge.jpg")
 # img = cv.imread("./clifford.jpg")
 # img = cv.imread("./color_circles.jpg")
 
+# Blur image to reduce noise for improved edge detection
+img_blur = cv.GaussianBlur(img,(3,3), sigmaX=0, sigmaY=0)
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
@@ -62,6 +64,10 @@ for count, mask in enumerate(mask_dict):
     mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
 
 
+'''SECTIONING'''
+
+
+
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
 fig = plt.figure(figsize=(10,7))
@@ -77,9 +83,9 @@ plt.title("Original")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
-plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_blur, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Simplified")
+plt.title("Blurred")
 
 # Add subplot in third position
 fig.add_subplot(rows, columns, 3)
