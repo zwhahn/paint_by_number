@@ -55,8 +55,6 @@ mask_dict = {}
 for count, color_limit in enumerate(bgr_color_limit_dict):
     mask_dict[count] = cv.inRange(img_simplified, bgr_color_limit_dict[count][0], bgr_color_limit_dict[count][1]) 
 
-mask_img = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[0])
-
 # Apply masks
 mask_img_dict = {}
 for count, mask in enumerate(mask_dict):
