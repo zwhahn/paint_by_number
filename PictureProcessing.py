@@ -2,8 +2,8 @@ import cv2 as cv
 import numpy as np
 
 # Load original image
-img = cv.imread("./pa_logo.png")
-# img = cv.imread("./golden_gate_bridge.jpg")
+# img = cv.imread("./pa_logo.png")
+img = cv.imread("./golden_gate_bridge.jpg")
 cv.imshow("Original image", img)
 
 '''COLOR QUANTIZATION'''
@@ -30,9 +30,7 @@ center = np.uint8(center)  # RGB values of the final clusters
 print(center)
 img_simplified = center[label.flatten()]
 img_simplified = img_simplified.reshape((img.shape))
-
-
-# cv.imshow('Simplified Image', img_simplified)
+cv.imshow('Simplified Image', img_simplified)
 
 '''EDGE DETECTION'''
 # Detect image edges
@@ -44,13 +42,7 @@ edges_bgr = cv.cvtColor(edges, cv.COLOR_GRAY2BGR)  # convert edges to bgr
 overlay_img = img_simplified + edges_bgr
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
 
-# Lower and higher HSV of red
-lower_hsv1 = np.array([0, 100, 100])
-upper_hsv1 = np.array([10, 255, 255])
-
-lower_hsv2 = np.array([160, 100, 100])
-upper_hsv2 = np.array([179, 255, 255])
-
+'''COLOR MASKING'''
 # Define color dictionary (credit: Ari Hashemian https://stackoverflow.com/questions/36817133/identifying-the-range-of-a-color-in-hsv-using-opencv)
 color_dict_HSV = {'black': [[179, 255, 30], [0, 0, 0]],
               'white': [[179, 18, 255], [0, 0, 231]],
@@ -69,18 +61,18 @@ red_lower_mask = cv.inRange(img, np.array(color_dict_HSV['red2'][1]), np.array(c
 red_upper_mask = cv.inRange(img, np.array(color_dict_HSV['red1'][1]), np.array(color_dict_HSV['red1'][0]))
 full_red_mask = red_lower_mask + red_upper_mask
 
-red_detected_img = cv.bitwise_and(img, img, mask = full_red_mask)
-cv.imshow("Red Detected Ijmages", red_detected_img)
+red_detected_img = cv.bitwise_and(img_simplified, img_simplified, mask = full_red_mask)
+cv.imshow("Red Detected Images", red_detected_img)
 
 # Generate black mask
-black_mask = cv.inRange(img, np.array(color_dict_HSV["black"][1]), np.array(color_dict_HSV["black"][0]))
-black_detected_img = cv.bitwise_and(img, img, mask = black_mask)
+black_mask = cv.inRange(img_simplified, np.array(color_dict_HSV["black"][1]), np.array(color_dict_HSV["black"][0]))
+black_detected_img = cv.bitwise_and(img_simplified, img_simplified, mask = black_mask)
 
 # cv.imshow("Black Detected Images", black_detected_img)
 
 # Generate blue mask
 blue_mask = cv.inRange(img, np.array(color_dict_HSV["blue"][1]), np.array(color_dict_HSV["blue"][0]))
-blue_detected_img = cv.bitwise_and(img, img, mask = blue_mask)
+blue_detected_img = cv.bitwise_and(img_simplified, img_simplified, mask = blue_mask)
 
 # cv.imshow("Blue Detected Images", blue_detected_img)
 
