@@ -44,12 +44,15 @@ overlay_img = img_simplified + edges_bgr
 
 '''COLOR MASKING'''
 # Compute the upper and lower limits
+tol = 10  # toleramce 
 bgr_color_limit_dict = {}
 for count, bgr_color in enumerate(center):
-    pass
-    
+    bgr_color_limit_dict[count] = np.array([center[count][0] - tol, center[count][1] - tol, center[count][2] - tol]), np.array([center[count][0] + tol, center[count][1] + tol, center[count][2] + tol])
+
 print("bgr_color_limit_dict: ", bgr_color_limit_dict)
 
+# Create masks
+mask_dict = {}
 mask = cv.inRange(img_simplified, np.array([center[1][0] - 10, center[1][1] - 10, center[1][2] - 10]), np.array([center[1][0] + 10, center[1][1] + 10, center[1][2] + 10]))
 result = cv.bitwise_and(img_simplified, img_simplified,  mask = mask)
 
