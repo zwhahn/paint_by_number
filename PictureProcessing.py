@@ -43,33 +43,13 @@ overlay_img = img_simplified + edges_bgr
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
 
 '''COLOR MASKING'''
-hsv_color_dict = {} 
-def bgr_to_hsv(color):
-    bgr_color = np.uint8([[color]])
-    hsv_color = cv.cvtColor(bgr_color, cv.COLOR_BGR2HSV)
-    return hsv_color
-
-# Loop through the k-means colors and convert to hsv for masking
-for count, bgr_color in enumerate(center):
-    print("Print each color:", count, bgr_color)
-    print(bgr_to_hsv(bgr_color))
-    hsv_color_dict[count] = bgr_to_hsv(bgr_color)
-
 # Compute the upper and lower limits
-hsv_color_limit_dict = {}
-for count, hsv_color in enumerate(hsv_color_dict):
-    lower_limit = hsv_color_dict[count][0][0][0] - 10, 100, 100
-    print("lower_limit: ", lower_limit)
-    upper_limit = hsv_color_dict[count][0][0][0] + 10, 255, 255
-    hsv_color_limit_dict[count] = [upper_limit, lower_limit] 
+bgr_color_limit_dict = {}
+for count, bgr_color in enumerate(center):
+    pass
     
-print("hsv_color_limit_dict: ", hsv_color_limit_dict)
-# print(type(np.array(hsv_color_limit_dict[1][1])))
-# print(type(np.array([15,50,180])))
-print(center[0][0])
+print("bgr_color_limit_dict: ", bgr_color_limit_dict)
 
-# hsv_img = cv.cvtColor(img_simplified, cv.COLOR_BGR2HSV)
-# mask = cv.inRange(img_simplified, np.array([10,20,20]), np.array([25, 255, 255]))
 mask = cv.inRange(img_simplified, np.array([center[1][0] - 10, center[1][1] - 10, center[1][2] - 10]), np.array([center[1][0] + 10, center[1][1] + 10, center[1][2] + 10]))
 result = cv.bitwise_and(img_simplified, img_simplified,  mask = mask)
 
