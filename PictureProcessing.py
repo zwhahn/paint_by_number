@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+from matplotlib import pyplot as plt 
 
 # Load original image
 # img = cv.imread("./pa_logo.png")
@@ -24,12 +25,12 @@ img_reshape = np.float32(img_reshape)
 # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
 # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
-K = 9  # number of clusters (or colors)
+K = 3  # number of clusters (or colors)
 ret, label, center = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 # Convert back to uint8
 center = np.uint8(center)  # RGB values of the final clusters
-print(center)
+# print(center)
 img_simplified = center[label.flatten()]
 img_simplified = img_simplified.reshape((img.shape))
 
@@ -61,15 +62,46 @@ for count, mask in enumerate(mask_dict):
     mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
 
 
+'''MULTI DISPLAY'''
+# Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
+fig = plt.figure(figsize=(10,7))
+
+rows = 2
+columns = 2
+
+# Add subplot in first position
+fig.add_subplot(rows, columns, 1)
+plt.imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
+plt.axis('off')
+plt.title("Original")
+
+# Add subplot in second position
+fig.add_subplot(rows, columns, 2)
+plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
+plt.axis('off')
+plt.title("Simplified")
+
+# Add subplot in third position
+fig.add_subplot(rows, columns, 3)
+plt.imshow(cv.cvtColor(mask_img_dict[0], cv.COLOR_BGR2RGB))
+plt.axis('off')
+plt.title("Mask 1")
+
+# Add subplot in fourth position
+fig.add_subplot(rows, columns, 4)
+plt.imshow(cv.cvtColor(mask_img_dict[1], cv.COLOR_BGR2RGB))
+plt.axis('off')
+plt.title("Mask 2")
+
+
 '''IMAGES TO SHOW'''
-cv.imshow("Original image", img)
-cv.imshow('Simplified Image', img_simplified)
+# cv.imshow("Simplified Image', img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
-cv.imshow("Mask Image 1", mask_img_dict[0])
-cv.imshow("Mask Image 2", mask_img_dict[1])
-cv.imshow("Mask Image 3", mask_img_dict[2])
+# cv.imshow("Mask Image 1", mask_img_dict[0])
+# cv.imshow("Mask Image 2", mask_img_dict[1])
+# cv.imshow("Mask Image 3", mask_img_dict[2])
 
 
-
+plt.show()
 cv.waitKey(0)  # keep images open until any key is pressed
