@@ -23,7 +23,7 @@ img_reshape = np.float32(img_reshape)
 # Define criteria, number of clusters(K), and apply kmeans()
 # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
 # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
-criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max_iter
+criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
 K = 9  # number of clusters (or colors)
 ret, label, center = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
@@ -61,6 +61,7 @@ mask_img = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[0])
 mask_img_dict = {}
 for count, mask in enumerate(mask_dict):
     mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
+
 
 '''IMAGES TO SHOW'''
 cv.imshow("Original image", img)
