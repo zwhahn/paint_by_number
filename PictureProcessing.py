@@ -45,14 +45,16 @@ overlay_img = img_simplified + edges_bgr
 '''COLOR MASKING'''
 hsv_color_dict = {} 
 
-def rgb_to_hsv(color):
-    rgb_color = np.uint8([[color]])
-    hsv_color = cv.cvtColor(rgb_color, cv.COLOR_BGR2HSV)
+def bgr_to_hsv(color):
+    bgr_color = np.uint8([[color]])
+    hsv_color = cv.cvtColor(bgr_color, cv.COLOR_BGR2HSV)
     return hsv_color
 
 for count, color in enumerate(center):
     print("Print each color:", count, color)
-    print(rgb_to_hsv(color))
+    print(bgr_to_hsv(color))
+    hsv_color_dict[count] = bgr_to_hsv(color)
+
 
 # cv.imshow("Blue Detected Images", blue_detected_img)
 
