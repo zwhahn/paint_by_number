@@ -4,6 +4,9 @@ import numpy as np
 # Load original image
 # img = cv.imread("./pa_logo.png")
 img = cv.imread("./golden_gate_bridge.jpg")
+# img = cv.imread("./clifford.jpg")
+# img = cv.imread("./color_circles.jpg")
+
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
@@ -21,13 +24,15 @@ img_reshape = np.float32(img_reshape)
 # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
 # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max_iter
-K = 3  # number of clusters (or colors)
+K = 9  # number of clusters (or colors)
 ret, label, center = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 # Convert back to uint8
 center = np.uint8(center)  # RGB values of the final clusters
+print(center)
 img_simplified = center[label.flatten()]
 img_simplified = img_simplified.reshape((img.shape))
+
 
 '''EDGE DETECTION'''
 # Detect image edges
@@ -37,9 +42,10 @@ edges = cv.Canny(img_simplified, 100, 200)
 edges_bgr = cv.cvtColor(edges, cv.COLOR_GRAY2BGR)  # convert edges to bgr
 overlay_img = img_simplified + edges_bgr
 
+
 '''COLOR MASKING'''
 # Compute the upper and lower limits
-tol = 10  # toleramce 
+tol = 5  # tolerance 
 bgr_color_limit_dict = {}
 for count, bgr_color in enumerate(center):
     bgr_color_limit_dict[count] = np.array([center[count][0] - tol, center[count][1] - tol, center[count][2] - tol]), np.array([center[count][0] + tol, center[count][1] + tol, center[count][2] + tol])
@@ -51,18 +57,20 @@ for count, color_limit in enumerate(bgr_color_limit_dict):
 
 mask_img = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[0])
 
-
 # Apply masks
 mask_img_dict = {}
 for count, mask in enumerate(mask_dict):
     mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
 
 '''IMAGES TO SHOW'''
-# cv.imshow("Original image", img)
-# cv.imshow('Simplified Image', img_simplified)
+cv.imshow("Original image", img)
+cv.imshow('Simplified Image', img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
-cv.imshow("Display", mask_img_dict[0])
+cv.imshow("Mask Image 1", mask_img_dict[0])
+cv.imshow("Mask Image 2", mask_img_dict[1])
+cv.imshow("Mask Image 3", mask_img_dict[2])
+
 
 
 cv.waitKey(0)  # keep images open until any key is pressed
