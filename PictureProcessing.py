@@ -4,7 +4,6 @@ import numpy as np
 # Load original image
 # img = cv.imread("./pa_logo.png")
 img = cv.imread("./golden_gate_bridge.jpg")
-cv.imshow("Original image", img)
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
@@ -27,20 +26,16 @@ ret, label, center = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RAN
 
 # Convert back to uint8
 center = np.uint8(center)  # RGB values of the final clusters
-print(center)
 img_simplified = center[label.flatten()]
 img_simplified = img_simplified.reshape((img.shape))
-cv.imshow('Simplified Image', img_simplified)
 
 '''EDGE DETECTION'''
 # Detect image edges
 edges = cv.Canny(img_simplified, 100, 200) 
-cv.imshow("Simplified Image Edges", edges)
 
 # Overlay edges on original image
 edges_bgr = cv.cvtColor(edges, cv.COLOR_GRAY2BGR)  # convert edges to bgr
 overlay_img = img_simplified + edges_bgr
-# cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
 
 '''COLOR MASKING'''
 # Compute the upper and lower limits
@@ -49,17 +44,25 @@ bgr_color_limit_dict = {}
 for count, bgr_color in enumerate(center):
     bgr_color_limit_dict[count] = np.array([center[count][0] - tol, center[count][1] - tol, center[count][2] - tol]), np.array([center[count][0] + tol, center[count][1] + tol, center[count][2] + tol])
 
-print("bgr_color_limit_dict: ", bgr_color_limit_dict)
-
 # Create masks
 mask_dict = {}
 for count, color_limit in enumerate(bgr_color_limit_dict):
     mask_dict[count] = cv.inRange(img_simplified, bgr_color_limit_dict[count][0], bgr_color_limit_dict[count][1]) 
-    
-mask = cv.inRange(img_simplified, np.array([center[1][0] - 10, center[1][1] - 10, center[1][2] - 10]), np.array([center[1][0] + 10, center[1][1] + 10, center[1][2] + 10]))
-result = cv.bitwise_and(img_simplified, img_simplified,  mask = mask)
 
-cv.imshow("Mask Images", result)
-# print(type(img_simplified))
+mask_img = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[0])
+
+
+# Apply masks
+mask_img_dict = {}
+for count, mask in enumerate(mask_dict):
+    mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
+
+'''IMAGES TO SHOW'''
+# cv.imshow("Original image", img)
+# cv.imshow('Simplified Image', img_simplified)
+# cv.imshow("Simplified Image Edges", edges)
+# cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
+cv.imshow("Display", mask_img_dict[0])
+
 
 cv.waitKey(0)  # keep images open until any key is pressed
