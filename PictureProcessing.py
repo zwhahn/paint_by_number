@@ -38,15 +38,6 @@ img_simplified = center[label.flatten()]
 img_simplified = img_simplified.reshape((img.shape))
 
 
-'''EDGE DETECTION'''
-# Detect image edges
-edges = cv.Canny(img_simplified, 100, 200) 
-
-# Overlay edges on original image
-edges_bgr = cv.cvtColor(edges, cv.COLOR_GRAY2BGR)  # convert edges to bgr
-overlay_img = img_simplified + edges_bgr
-
-
 '''COLOR MASKING'''
 # Compute the upper and lower limits
 tol = 5  # tolerance 
@@ -63,6 +54,15 @@ for count, color_limit in enumerate(bgr_color_limit_dict):
 mask_img_dict = {}
 for count, mask in enumerate(mask_dict):
     mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
+
+
+'''EDGE DETECTION'''
+# Detect image edges
+edges = cv.Canny(mask_img_dict[0], 100, 200) 
+
+# Overlay edges on original image
+edges_bgr = cv.cvtColor(edges, cv.COLOR_GRAY2BGR)  # convert edges to bgr
+overlay_img = img_simplified + edges_bgr
 
 
 '''SECTIONING'''
@@ -96,18 +96,19 @@ plt.title("Mask 1")
 
 # Add subplot in fourth position
 fig.add_subplot(rows, columns, 4)
-plt.imshow(cv.cvtColor(mask_img_dict[1], cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(edges_bgr, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Mask 2")
+plt.title("Mask 1 Edges")
 
 
 '''IMAGES TO SHOW'''
-cv.imshow("Original Image", img)
+# cv.imshow("Original Image", img)
 cv.imshow("Blurred Image", img_blur)
 cv.imshow("Simplified Image", img_simplified)
-cv.imshow("Simplified Image Edges", edges)
+# cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
-# cv.imshow("Mask Image 1", mask_img_dict[0])
+cv.imshow("Mask Image 1", mask_img_dict[0])
+cv.imshow("Mask Image 1 Edges", edges_bgr)
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
 
