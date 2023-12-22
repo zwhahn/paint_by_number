@@ -4,12 +4,13 @@ from matplotlib import pyplot as plt
 
 # Load original image
 # img = cv.imread("./pa_logo.png")
-img = cv.imread("./golden_gate_bridge.jpg")
+# img = cv.imread("./golden_gate_bridge.jpg")
 # img = cv.imread("./clifford.jpg")
 # img = cv.imread("./color_circles.jpg")
+img = cv.imread("./brad_pitt.jpg")
 
 # Blur image to reduce noise for improved edge detection
-img_blur = cv.GaussianBlur(img,(3,3), sigmaX=0, sigmaY=0)
+img_blur = cv.GaussianBlur(img,(5,5), sigmaX=1.5, sigmaY=1.5)
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
@@ -18,7 +19,7 @@ img_blur = cv.GaussianBlur(img,(3,3), sigmaX=0, sigmaY=0)
 # each pixel is a row and each column represents a column (R, G, B).
 # This allows the k-means cluster algorithm to cluster similar colors
 # together.  
-img_reshape = img.reshape((-1, 3))
+img_reshape = img_blur.reshape((-1, 3))
 
 # Convert to float32
 img_reshape = np.float32(img_reshape)
@@ -27,7 +28,7 @@ img_reshape = np.float32(img_reshape)
 # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
 # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
-K = 3  # number of clusters (or colors)
+K = 6  # number of clusters (or colors)
 ret, label, center = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 # Convert back to uint8
@@ -101,13 +102,15 @@ plt.title("Mask 2")
 
 
 '''IMAGES TO SHOW'''
-# cv.imshow("Simplified Image', img_simplified)
-# cv.imshow("Simplified Image Edges", edges)
+cv.imshow("Original Image", img)
+cv.imshow("Blurred Image", img_blur)
+cv.imshow("Simplified Image", img_simplified)
+cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
 # cv.imshow("Mask Image 1", mask_img_dict[0])
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
 
 
-plt.show()
+# plt.show()
 cv.waitKey(0)  # keep images open until any key is pressed
