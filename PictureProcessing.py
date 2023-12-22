@@ -92,6 +92,9 @@ def contour_func(input_img):
                     cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
     return input_img
 
+for mask_img in mask_img_dict:
+    cntr_img = contour_func(mask_img_dict[mask_img])
+
 
 '''SECTIONING'''
 
