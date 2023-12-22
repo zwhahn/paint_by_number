@@ -66,6 +66,10 @@ for count, mask in enumerate(mask_dict):
 # overlay_img = img_simplified + edges_bgr
 
 
+'''CONTOURS'''
+img_gray = cv.cvtColor(mask_img_dict[0], cv.COLOR_BGR2GRAY)
+
+
 '''SECTIONING'''
 
 
@@ -104,11 +108,12 @@ plt.title("Mask 1")
 
 '''IMAGES TO SHOW'''
 # cv.imshow("Original Image", img)
-cv.imshow("Blurred Image", img_blur)
+# cv.imshow("Blurred Image", img_blur)
 cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
-# cv.imshow("Mask Image 1", mask_img_dict[0])
+cv.imshow("Mask Image 1", mask_img_dict[0])
+cv.imshow("Mask Image Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Edges", edges_bgr)
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
