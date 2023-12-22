@@ -10,7 +10,8 @@ from matplotlib import pyplot as plt
 img = cv.imread("./brad_pitt.jpg")
 
 # Blur image to reduce noise for improved edge detection
-img_blur = cv.GaussianBlur(img,(5,5), sigmaX=1.5, sigmaY=1.5)
+img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
+
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
