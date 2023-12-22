@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt 
+import imutils
 
 # Load original image
 # img = cv.imread("./pa_logo.png")
@@ -72,7 +73,9 @@ img_gray = cv.cvtColor(mask_img_dict[0], cv.COLOR_BGR2GRAY)  # convert to graysc
 img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
 
 # Find contours
-
+cntrs = cv.findContours(img_thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+cntrs = imutils.grab_contours(cntrs) # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
+ 
 
 
 '''SECTIONING'''
