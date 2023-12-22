@@ -93,7 +93,7 @@ def contour_func(input_img):
     return input_img
 
 for mask_img in mask_img_dict:
-    cntr_img = contour_func(mask_img_dict[mask_img])
+    contour_func(mask_img_dict[mask_img])
 
 
 '''SECTIONING'''
