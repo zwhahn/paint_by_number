@@ -67,7 +67,12 @@ for count, mask in enumerate(mask_dict):
 
 
 '''CONTOURS'''
-img_gray = cv.cvtColor(mask_img_dict[0], cv.COLOR_BGR2GRAY)
+# Following method from pyimagesearch.com (https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/)
+img_gray = cv.cvtColor(mask_img_dict[0], cv.COLOR_BGR2GRAY)  # convert to grayscale
+img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
+
+# Find contours
+
 
 
 '''SECTIONING'''
@@ -113,7 +118,8 @@ cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
 cv.imshow("Mask Image 1", mask_img_dict[0])
-cv.imshow("Mask Image Gray Scale", img_gray)
+cv.imshow("Mask Image 1 Gray Scale", img_gray)
+cv.imshow("Mask Image 1 Threshold", img_thresh)
 # cv.imshow("Mask Image 1 Edges", edges_bgr)
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
