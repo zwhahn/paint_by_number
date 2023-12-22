@@ -4,11 +4,11 @@ from matplotlib import pyplot as plt
 import imutils
 
 # Load original image
-# img = cv.imread("./pa_logo.png")
+img = cv.imread("./pa_logo.png")
 # img = cv.imread("./golden_gate_bridge.jpg")
 # img = cv.imread("./clifford.jpg")
 # img = cv.imread("./color_circles.jpg")
-img = cv.imread("./brad_pitt.jpg")
+# img = cv.imread("./brad_pitt.jpg")
 
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
@@ -68,27 +68,29 @@ for count, mask in enumerate(mask_dict):
 
 
 '''CONTOURS'''
-# Following method from pyimagesearch.com (https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/)
-img_gray = cv.cvtColor(mask_img_dict[0], cv.COLOR_BGR2GRAY)  # convert to grayscale
-img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
+def contour_func(input_img):
+    # Following method from pyimagesearch.com (https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/)
+    img_gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)  # convert to grayscale
+    img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
 
-# Find contours
-cntrs = cv.findContours(img_thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-cntrs = imutils.grab_contours(cntrs)  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
+    # Find contours
+    cntrs = cv.findContours(img_thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    cntrs = imutils.grab_contours(cntrs)  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
 
-# Process and draw contours
-for cntr in cntrs:
-    # Compute the center
-    M = cv.moments(cntr)
-    if int(M["m00"]) != 0:
-        center_x = int(M["m10"] / M["m00"])
-        center_y = int(M["m01"] / M["m00"])
+    # Process and draw contours
+    for cntr in cntrs:
+        # Compute the center
+        M = cv.moments(cntr)
+        if int(M["m00"]) != 0:
+            center_x = int(M["m10"] / M["m00"])
+            center_y = int(M["m01"] / M["m00"])
 
-        # Draw contour and center on image
-        cv.drawContours(img_simplified, [cntr], -1, (0, 255, 0), 2)
-        cv.circle(img_simplified, (center_x, center_y), 7, (255, 255, 255), -1)
-        cv.putText(img_simplified, "center", (center_x - 20, center_y - 20), 
-                cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            # Draw contour and center on image
+            cv.drawContours(input_img, [cntr], -1, (0, 255, 0), 2)
+            cv.circle(input_img, (center_x, center_y), 7, (255, 255, 255), -1)
+            cv.putText(input_img, "center", (center_x - 20, center_y - 20), 
+                    cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    return input_img
 
 
 '''SECTIONING'''
@@ -134,8 +136,8 @@ cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
 cv.imshow("Mask Image 1", mask_img_dict[0])
-cv.imshow("Mask Image 1 Gray Scale", img_gray)
-cv.imshow("Mask Image 1 Threshold", img_thresh)
+# cv.imshow("Mask Image 1 Gray Scale", img_gray)
+# cv.imshow("Mask Image 1 Threshold", img_thresh)
 # cv.imshow("Mask Image 1 Edges", edges_bgr)
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
