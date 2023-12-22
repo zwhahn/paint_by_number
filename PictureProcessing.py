@@ -74,8 +74,21 @@ img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1]
 
 # Find contours
 cntrs = cv.findContours(img_thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-cntrs = imutils.grab_contours(cntrs) # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
- 
+cntrs = imutils.grab_contours(cntrs)  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
+
+# Process and draw contours
+for cntr in cntrs:
+    # Compute the center
+    M = cv.moments(cntr)
+    if int(M["m00"]) != 0:
+        center_x = int(M["m10"] / M["m00"])
+        center_y = int(M["m01"] / M["m00"])
+
+        # Draw contour and center on image
+        cv.drawContours(img_simplified, [cntr], -1, (0, 255, 0), 2)
+        cv.circle(img_simplified, (center_x, center_y), 7, (255, 255, 255), -1)
+        cv.putText(img_simplified, "center", (center_x - 20, center_y - 20), 
+                cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
 
 '''SECTIONING'''
