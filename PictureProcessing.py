@@ -30,12 +30,12 @@ img_reshape = np.float32(img_reshape)
 # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
 K = 6  # number of clusters (or colors)
-ret, label, center = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
+ret, label, base_colors = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 # Convert back to uint8
-center = np.uint8(center)  # RGB values of the final clusters
-# print(center)
-img_simplified = center[label.flatten()]
+base_colors = np.uint8(base_colors)  # BGR values of the final clusters
+# print(base_colors)
+img_simplified = base_colors[label.flatten()]
 img_simplified = img_simplified.reshape((img.shape))
 
 
@@ -43,8 +43,8 @@ img_simplified = img_simplified.reshape((img.shape))
 # Compute the upper and lower limits
 tol = 5  # tolerance 
 bgr_color_limit_dict = {}
-for count, bgr_color in enumerate(center):
-    bgr_color_limit_dict[count] = np.array([center[count][0] - tol, center[count][1] - tol, center[count][2] - tol]), np.array([center[count][0] + tol, center[count][1] + tol, center[count][2] + tol])
+for count, bgr_color in enumerate(base_colors):
+    bgr_color_limit_dict[count] = np.array([base_colors[count][0] - tol, base_colors[count][1] - tol, base_colors[count][2] - tol]), np.array([base_colors[count][0] + tol, base_colors[count][1] + tol, base_colors[count][2] + tol])
 
 # Create masks
 mask_dict = {}
@@ -109,7 +109,7 @@ cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
 cv.imshow("Mask Image 1", mask_img_dict[0])
-cv.imshow("Mask Image 1 Edges", edges_bgr)
+# cv.imshow("Mask Image 1 Edges", edges_bgr)
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
 
