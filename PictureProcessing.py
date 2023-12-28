@@ -4,11 +4,11 @@ from matplotlib import pyplot as plt
 import imutils
 
 # Load original image
-img = cv.imread("./pa_logo.png")
+# img = cv.imread("./pa_logo.png")
 # img = cv.imread("./golden_gate_bridge.jpg")
 # img = cv.imread("./clifford.jpg")
 # img = cv.imread("./color_circles.jpg")
-# img = cv.imread("./brad_pitt.jpg")
+img = cv.imread("./brad_pitt.jpg")
 
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
@@ -69,8 +69,9 @@ for count, mask in enumerate(mask_dict):
 
 '''CONTOURS'''
 def contour_func(input_img):
+    input_img_copy = input_img.copy()
     # Following method from pyimagesearch.com (https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/)
-    img_gray = cv.cvtColor(input_img, cv.COLOR_BGR2GRAY)  # convert to grayscale
+    img_gray = cv.cvtColor(input_img_copy, cv.COLOR_BGR2GRAY)  # convert to grayscale
     img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
 
     # Find contours
@@ -86,18 +87,18 @@ def contour_func(input_img):
             center_y = int(M["m01"] / M["m00"])
 
             # Draw contour and center on image
-            cv.drawContours(input_img, [cntr], -1, (0, 255, 0), 2)
-            cv.circle(input_img, (center_x, center_y), 7, (255, 255, 255), -1)
-            cv.putText(input_img, "center", (center_x - 20, center_y - 20), 
+            cv.drawContours(input_img_copy, [cntr], -1, (0, 255, 0), 2)
+            cv.circle(input_img_copy, (center_x, center_y), 7, (255, 255, 255), -1)
+            cv.putText(input_img_copy, "center", (center_x - 20, center_y - 20), 
                     cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-    return input_img
+    return input_img_copy
 
-for mask_img in mask_img_dict:
-    contour_func(mask_img_dict[mask_img])
+mask_img_cntr_dict = {}
+for count, mask_img in enumerate(mask_img_dict):
+    mask_img_cntr_dict[count] = contour_func(mask_img_dict[mask_img])
 
 
 '''SECTIONING'''
-
 
 
 '''MULTI DISPLAY'''
@@ -109,15 +110,15 @@ columns = 2
 
 # Add subplot in first position
 fig.add_subplot(rows, columns, 1)
-plt.imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_blur, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Original")
+plt.title("Original Blurred")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
-plt.imshow(cv.cvtColor(img_blur, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Blurred")
+plt.title("Simplified Image")
 
 # Add subplot in third position
 fig.add_subplot(rows, columns, 3)
@@ -127,9 +128,11 @@ plt.title("Mask 1")
 
 # Add subplot in fourth position
 fig.add_subplot(rows, columns, 4)
-plt.imshow(cv.cvtColor(mask_img_dict[2], cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(mask_img_cntr_dict[0], cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Mask 1")
+plt.title("Mask 1 w/ Contour")
+
+# plt.show()  # display matplotlib figures 
 
 
 '''IMAGES TO SHOW'''
@@ -141,10 +144,9 @@ cv.imshow("Simplified Image", img_simplified)
 cv.imshow("Mask Image 1", mask_img_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
-# cv.imshow("Mask Image 1 Edges", edges_bgr)
+cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
 
 
-# plt.show()
 cv.waitKey(0)  # keep images open until any key is pressed
