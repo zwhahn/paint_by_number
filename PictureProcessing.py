@@ -75,14 +75,14 @@ def contour_func(input_img):
     img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
 
     # Find contours
-    cntrs, hierarchy = cv.findContours(img_thresh, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
     # print("hierarchy test: ", hierarchy[0])
-    cntrs = imutils.grab_contours([cntrs, hierarchy])  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
+    contours = imutils.grab_contours([contours, hierarchy])  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
 
     # Process and draw contours
-    for count, cntr in enumerate(cntrs):
+    for count, contour in enumerate(contours):
         # Compute the center
-        M = cv.moments(cntr)
+        M = cv.moments(contour)
         if int(M["m00"]) != 0:
             center_x = int(M["m10"] / M["m00"])
             center_y = int(M["m01"] / M["m00"])
@@ -90,7 +90,7 @@ def contour_func(input_img):
             # Only draw contours that don't have children
             if hierarchy[0][count][2] == -1:  
                 # Draw contour and center on image
-                cv.drawContours(input_img_copy, [cntr], -1, (0, 255, 0), 2)
+                cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 2)
                 cv.circle(input_img_copy, (center_x, center_y), 7, (255, 255, 255), -1)
                 # cv.putText(input_img_copy, "center", (center_x - 20, center_y - 20), 
                         # cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
