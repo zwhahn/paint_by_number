@@ -110,16 +110,20 @@ print(type(cntr_dict[0][0]))
 # Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
 
 # Loop through all pixels in img and calculate distances to the contour, negative value means its outside of contour
-raw_dist = np.empty(img.shape, dtype=np.float32)  # initialize numpy array for each pixel in img
-for i in range(img.shape[0]): 
-    for j in range(img.shape[1]):
-        raw_dist[i,j] = cv.pointPolygonTest(cntr_dict[0][0], (j,i), True)
+def label_func(contours, input_img):
+    input_img_copy = input_img.copy()
+    raw_dist = np.empty(img.shape, dtype=np.float32)  # initialize numpy array for each pixel in img
+    for i in range(img.shape[0]): 
+        for j in range(img.shape[1]):
+            raw_dist[i,j] = cv.pointPolygonTest(contours, (j,i), True)
+    minVal, maxVal, _, max_loc = cv.minMaxLoc(raw_dist[0])
 
-print(raw_dist)
+    cv.circle(input_img_copy, max_loc, 7, (255, 255, 255), -1) 
+    return input_img_copy
+    
+img_test = label_func(contours=cntr_dict[0][0], input_img=mask_img_cntr_dict[0])
 
-minVal, maxVal, _, maxDistPt = cv.minMaxLoc(raw_dist[0])
-minVal = abs(minVal)
-maxVal = abs(maxVal)
+
 
 
 '''MULTI DISPLAY'''
@@ -165,9 +169,10 @@ plt.title("Mask 1 w/ Contour")
 # cv.imshow("Mask Image 1", mask_img_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
-# cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
+cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
+cv.imshow("Test Image", img_test)
 
 
 cv.waitKey(0)  # keep images open until any key is pressed
