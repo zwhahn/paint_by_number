@@ -109,21 +109,20 @@ print(type(cntr_dict[0][0]))
 '''LABELING'''
 # Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
 
-# Loop through all pixels in img and calculate distances to the contour, negative value means its outside of contour
+# Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
 def label_func(contours, input_img):
     input_img_copy = input_img.copy()
-    raw_dist = np.empty(img.shape, dtype=np.float32)  # initialize numpy array for each pixel in img
-    for i in range(img.shape[0]): 
-        for j in range(img.shape[1]):
-            raw_dist[i,j] = cv.pointPolygonTest(contours, (j,i), True)
+    raw_dist = np.empty(input_img.shape, dtype=np.float32)  # initialize numpy array for each pixel in img
+    for i in range(input_img.shape[0]): 
+        for j in range(input_img.shape[1]):
+            raw_dist[i,j] = cv.pointPolygonTest(contours[0], (j,i), True)
     minVal, maxVal, min_loc, max_loc = cv.minMaxLoc(raw_dist[0])
+    print(minVal)
 
-    cv.circle(input_img_copy, min_loc, 7, (255, 255, 255), -1) 
+    cv.circle(input_img_copy, max_loc, 7, (255, 255, 255), -1) 
     return input_img_copy
     
-img_test = label_func(contours=cntr_dict[0][0], input_img=mask_img_cntr_dict[0])
-
-
+img_test = label_func(contours=cntr_dict[0], input_img=mask_img_cntr_dict[0])
 
 
 '''MULTI DISPLAY'''
