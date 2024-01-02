@@ -115,9 +115,12 @@ def label_func(contours, input_img):
     raw_dist = np.empty(input_img.shape, dtype=np.float32)  # initialize numpy array for each pixel in img
     for i in range(input_img.shape[0]): 
         for j in range(input_img.shape[1]):
-            raw_dist[i,j] = cv.pointPolygonTest(contours[0], (j,i), True)
+            if cv.pointPolygonTest(contours[0][0], (j, i), False) > 0:  # check if point is inside contour
+                raw_dist[i,j] = cv.pointPolygonTest(contours[0][0], (j,i), True)  # only if inside contour calculate distance  
+            else:
+                raw_dist[i,j] = -1
     minVal, maxVal, min_loc, max_loc = cv.minMaxLoc(raw_dist[0])
-    print(minVal)
+    print(maxVal)
 
     cv.circle(input_img_copy, max_loc, 7, (255, 255, 255), -1) 
     return input_img_copy
