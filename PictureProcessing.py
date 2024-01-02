@@ -116,9 +116,9 @@ def label_func(contours, input_img):
     for i in range(img.shape[0]): 
         for j in range(img.shape[1]):
             raw_dist[i,j] = cv.pointPolygonTest(contours, (j,i), True)
-    minVal, maxVal, _, max_loc = cv.minMaxLoc(raw_dist[0])
+    minVal, maxVal, min_loc, max_loc = cv.minMaxLoc(raw_dist[0])
 
-    cv.circle(input_img_copy, max_loc, 7, (255, 255, 255), -1) 
+    cv.circle(input_img_copy, min_loc, 7, (255, 255, 255), -1) 
     return input_img_copy
     
 img_test = label_func(contours=cntr_dict[0][0], input_img=mask_img_cntr_dict[0])
