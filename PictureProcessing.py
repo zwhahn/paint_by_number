@@ -98,14 +98,13 @@ def contour_func(input_img):
     return contours, input_img_copy
 
 mask_img_cntr_dict = {}
-cntr_dict = {}
+cntr_dict = {}  # dict with a list of numpy arrays, each array represents a contour
 for count, mask_img in enumerate(mask_img_dict):
     contours, output_img = contour_func(mask_img_dict[mask_img])
     mask_img_cntr_dict[count] = output_img
     cntr_dict[count] = contours
 
-
-'''SECTIONING'''
+print(type(cntr_dict[0][0]))
 
 
 '''MULTI DISPLAY'''
@@ -139,19 +138,19 @@ plt.imshow(cv.cvtColor(mask_img_cntr_dict[0], cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Mask 1 w/ Contour")
 
-plt.show()  # display matplotlib figures 
+# plt.show()  # display matplotlib figures 
 
 
 '''IMAGES TO SHOW'''
 # cv.imshow("Original Image", img)
 # cv.imshow("Blurred Image", img_blur)
-cv.imshow("Simplified Image", img_simplified)
+# cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
-cv.imshow("Mask Image 1", mask_img_dict[0])
+# cv.imshow("Mask Image 1", mask_img_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
-cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
+# cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
 
