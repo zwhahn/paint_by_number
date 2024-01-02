@@ -95,11 +95,14 @@ def contour_func(input_img):
                 cv.circle(input_img_copy, (center_x, center_y), 7, (255, 255, 255), -1)
                 # cv.putText(input_img_copy, "center", (center_x - 20, center_y - 20), 
                         # cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-    return input_img_copy
+    return contours, input_img_copy
 
 mask_img_cntr_dict = {}
+cntr_dict = {}
 for count, mask_img in enumerate(mask_img_dict):
-    mask_img_cntr_dict[count] = contour_func(mask_img_dict[mask_img])
+    contours, output_img = contour_func(mask_img_dict[mask_img])
+    mask_img_cntr_dict[count] = output_img
+    cntr_dict[count] = contours
 
 
 '''SECTIONING'''
@@ -136,7 +139,7 @@ plt.imshow(cv.cvtColor(mask_img_cntr_dict[0], cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Mask 1 w/ Contour")
 
-# plt.show()  # display matplotlib figures 
+plt.show()  # display matplotlib figures 
 
 
 '''IMAGES TO SHOW'''
