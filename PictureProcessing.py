@@ -106,6 +106,9 @@ for count, mask_img in enumerate(mask_img_dict):
 
 print(type(cntr_dict[0][0]))
 
+'''LABELING'''
+# Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
+
 
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
