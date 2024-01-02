@@ -109,6 +109,18 @@ print(type(cntr_dict[0][0]))
 '''LABELING'''
 # Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
 
+# Loop through all pixels in img and calculate distances to the contour, negative value means its outside of contour
+raw_dist = np.empty(img.shape, dtype=np.float32)  # initialize numpy array for each pixel in img
+for i in range(img.shape[0]): 
+    for j in range(img.shape[1]):
+        raw_dist[i,j] = cv.pointPolygonTest(cntr_dict[0][0], (j,i), True)
+
+print(raw_dist)
+
+minVal, maxVal, _, maxDistPt = cv.minMaxLoc(raw_dist[0])
+minVal = abs(minVal)
+maxVal = abs(maxVal)
+
 
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
