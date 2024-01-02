@@ -89,12 +89,12 @@ def contour_func(input_img):
         
             cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 2)
 
-            # Only draw contours that don't have children
-            if hierarchy[0][count][3] == -1: # or hierarchy[0][count][3] != -1:
-                # Draw contour and center on image
-                cv.circle(input_img_copy, (center_x, center_y), 7, (255, 255, 255), -1)
-                # cv.putText(input_img_copy, "center", (center_x - 20, center_y - 20), 
-                        # cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            # # Only draw contours that don't have children
+            # if hierarchy[0][count][3] == -1: # or hierarchy[0][count][3] != -1:
+            #     # Draw contour and center on image
+            #     cv.circle(input_img_copy, (center_x, center_y), 7, (255, 255, 255), -1)
+            #     # cv.putText(input_img_copy, "center", (center_x - 20, center_y - 20), 
+            #             # cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
     return contours, input_img_copy
 
 mask_img_cntr_dict = {}
