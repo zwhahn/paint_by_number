@@ -138,11 +138,10 @@ for _, contours in cntr_dict.items():
 
 # Loop through all maxLoc and draw a circle there
 for count, location in enumerate(maxLoc_dict):
-    if maxLoc_dict[location]:
-        print("maxLoc length: ", len(maxLoc_dict))
-        cv.circle(mask_img_cntr_dict[0], maxLoc_dict[location], 7, (0, 0, 255), -1)
-        cv.putText(mask_img_cntr_dict[0], str(count+1), (maxLoc_dict[location][0] - 20, maxLoc_dict[location][1] - 20),  
-                   cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    print("maxLoc length: ", len(maxLoc_dict))
+    cv.circle(mask_img_cntr_dict[0], maxLoc_dict[location], 7, (0, 0, 255), -1)
+    cv.putText(mask_img_cntr_dict[0], str(count+1), (maxLoc_dict[location][0] - 20, maxLoc_dict[location][1] - 20),  
+                cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
 
 '''MULTI DISPLAY'''
