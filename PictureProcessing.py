@@ -125,12 +125,15 @@ def label_func(contour, grayscale_image_for_label_func = grayscale_image_for_lab
 
 # Loop through all contours, find maxLoc and save to dictionary
 maxLoc_dict = {}
-for count, contour in enumerate(contours[0]):
+for count, contour in enumerate(contours):
+    print("contour: ", type(contour))
+    print("contour shape: ", contour.shape)
     maxLoc_dict[count] = label_func(contour)
+
+print("contourS: ", type(contours))
 
 # Loop through all maxLoc and draw a circle there
 for location in maxLoc_dict:
-    print("Location: ", maxLoc_dict[location])
     if maxLoc_dict[location]:
         cv.circle(mask_img_cntr_dict[0], maxLoc_dict[location], 7, (255, 255, 255), -1)
 

@@ -29,11 +29,15 @@ contours,hierarchy = cv2.findContours(src,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
 res = np.zeros(src.shape,np.float32)                # array to store distances
 drawing = np.zeros((rows,cols,3),np.uint8)          # image to draw the distance
-cnt = contours[0]                                   # We take only one contour for testing
+cnt = contours[1]                                   # We take only one contour for testing
+print("contours: ", type(contours))
+print(cnt)
+print("cnt:", type(cnt))
+print("cnt shape:", cnt.shape)
 
 # Calculate distance from each point
-for i in xrange(rows):
-    for j in xrange(cols):
+for i in range(rows):
+    for j in range(cols):
         res.itemset((i,j),cv2.pointPolygonTest(cnt,(j,i),True))
 
 
@@ -41,8 +45,8 @@ mini,maxi = np.abs(cv2.minMaxLoc(res)[:2])          # Find minimum and maximum t
 mini = 255.0/mini
 maxi = 255.0/maxi
 
-for i in xrange(rows):                              # Now we colorise as per distance
-    for j in xrange(cols):
+for i in range(rows):                              # Now we colorise as per distance
+    for j in range(cols):
         if res.item((i,j))<0:
             drawing.itemset((i,j,0),255-int(abs(res.item(i,j))*mini))   # If outside, blue color
         elif res.item((i,j))>0:
