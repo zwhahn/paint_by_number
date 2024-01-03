@@ -126,9 +126,9 @@ def label_func(contour, grayscale_image_for_label_func = grayscale_image_for_lab
 # print(cntr_dict[0])
 # Loop through all contours, find maxLoc and save to dictionary
 maxLoc_dict = {}
-for count, contours in cntr_dict.items():
+for _, contours in cntr_dict.items():
     # print("contours: ", contours)
-    for contour in contours:
+    for count, contour in enumerate(contours):
         x, y, z = contour.shape
         # Only use the larger contours
         if x > 100:
