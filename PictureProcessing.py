@@ -110,7 +110,7 @@ for count, mask_img in enumerate(mask_img_dict):
 img_copy = mask_img_cntr_dict[0].copy()
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
 def label_func(contour):
-    img_size = img.shape[:2]
+    img_size = img.shape[:2]  # only need the columns and rows
     raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
     for i in range(img_size[0]): 
         for j in range(img_size[1]):
