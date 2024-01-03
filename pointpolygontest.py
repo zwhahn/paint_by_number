@@ -40,6 +40,9 @@ for i in range(rows):
     for j in range(cols):
         res.itemset((i,j),cv2.pointPolygonTest(cnt,(j,i),True))
 
+# Confirm logic
+minVal, maxVal, _, maxLoc = cv2.minMaxLoc(res)  # calculate max location (maxLoc)
+cv2.circle(drawing, maxLoc, 7, (255, 255, 255), -1) # draw cirlce
 
 mini,maxi = np.abs(cv2.minMaxLoc(res)[:2])          # Find minimum and maximum to adjust colors
 mini = 255.0/mini
