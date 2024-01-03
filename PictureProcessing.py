@@ -6,9 +6,9 @@ import imutils
 # Load original image
 # img = cv.imread("./pa_logo.png")
 # img = cv.imread("./golden_gate_bridge.jpg")
-# img = cv.imread("./clifford.jpg")
+img = cv.imread("./clifford.jpg")
 # img = cv.imread("./color_circles.jpg")
-img = cv.imread("./brad_pitt.jpg")
+# img = cv.imread("./brad_pitt.jpg")
 
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
@@ -115,10 +115,8 @@ def label_func(contour, grayscale_image_for_label_func = grayscale_image_for_lab
     for i in range(grayscale_image_for_label_func.shape[0]): 
         for j in range(grayscale_image_for_label_func.shape[1]):
             if cv.pointPolygonTest(contour, (j, i), False) > 0:  # check if point is inside contour
-                print("Inside contour")
+                # print("Inside contour")
                 raw_dist[i,j] = cv.pointPolygonTest(contour, (j,i), True)  # calculate distance  
-                # print("Inside Contour: ", raw_dist[i,j])
-                # print("Type: ", type(raw_dist[i,j]))
                 minVal, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
                 return maxLoc
 
