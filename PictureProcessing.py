@@ -122,12 +122,12 @@ def label_func(contour, grayscale_image_for_label_func = grayscale_image_for_lab
                 minVal, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
                 return maxLoc
 
-print("cntr_dict: ", len(cntr_dict))
+# print("cntr_dict: ", len(cntr_dict))
 # print(cntr_dict[0])
 # Loop through all contours, find maxLoc and save to dictionary
 maxLoc_dict = {}
 for count, contours in cntr_dict.items():
-    print("contours: ", contours)
+    # print("contours: ", contours)
     for contour in contours:
         x, y, z = contour.shape
         # Only use the larger contours
