@@ -108,12 +108,12 @@ for count, mask_img in enumerate(mask_img_dict):
 # Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
 
 img_copy = mask_img_cntr_dict[0].copy()
-grayscale_image_for_label_func = cv.cvtColor(img_copy, cv.COLOR_BGR2GRAY)
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
-def label_func(contour, grayscale_image_for_label_func = grayscale_image_for_label_func):
-    raw_dist = np.empty(grayscale_image_for_label_func.shape, dtype=np.float32)  # initialize numpy array for each pixel in img
-    for i in range(grayscale_image_for_label_func.shape[0]): 
-        for j in range(grayscale_image_for_label_func.shape[1]):
+def label_func(contour):
+    img_size = img.shape[:2]
+    raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
+    for i in range(img_size[0]): 
+        for j in range(img_size[1]):
             if cv.pointPolygonTest(contour, (j, i), False) > 0:  # check if point is inside contour
                 # print("Inside contour")
                 raw_dist[i,j] = cv.pointPolygonTest(contour, (j,i), True)  # calculate distance  
@@ -141,7 +141,7 @@ for count, location in enumerate(maxLoc_dict):
     print("maxLoc length: ", len(maxLoc_dict))
     cv.circle(mask_img_cntr_dict[0], maxLoc_dict[location], 7, (0, 0, 255), -1)
     cv.putText(mask_img_cntr_dict[0], str(count+1), (maxLoc_dict[location][0] - 20, maxLoc_dict[location][1] - 20),  
-                cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
 
 '''MULTI DISPLAY'''
