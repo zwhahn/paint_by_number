@@ -116,25 +116,23 @@ def label_func(contour, grayscale_image_for_label_func = grayscale_image_for_lab
     for i in range(grayscale_image_for_label_func.shape[0]): 
         for j in range(grayscale_image_for_label_func.shape[1]):
             if cv.pointPolygonTest(contour, (j, i), False) > 0:  # check if point is inside contour
+                print("Inside contour")
                 raw_dist[i,j] = cv.pointPolygonTest(contour, (j,i), True)  # calculate distance  
                 # print("Inside Contour: ", raw_dist[i,j])
                 # print("Type: ", type(raw_dist[i,j]))
-            else:
-                raw_dist[i,j] = -1
-    minVal, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
-
-    # cv.circle(input_img_copy, maxLoc, 7, (255, 255, 255), -1) 
-    return maxLoc
+                minVal, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
+                return maxLoc
 
 # Loop through all contours, find maxLoc and save to dictionary
 maxLoc_dict = {}
-for count, contour in enumerate(contours):
+for count, contour in enumerate(contours[0]):
     maxLoc_dict[count] = label_func(contour)
 
 # Loop through all maxLoc and draw a circle there
 for location in maxLoc_dict:
-    # print("Location: ", maxLoc_dict[location])
-    cv.circle(mask_img_cntr_dict[0], maxLoc_dict[location], 7, (255, 255, 255), -1)
+    print("Location: ", maxLoc_dict[location])
+    if maxLoc_dict[location]:
+        cv.circle(mask_img_cntr_dict[0], maxLoc_dict[location], 7, (255, 255, 255), -1)
 
 
 '''MULTI DISPLAY'''
