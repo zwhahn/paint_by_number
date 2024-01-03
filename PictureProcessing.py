@@ -75,15 +75,16 @@ def contour_func(input_img):
     img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
 
     # Find contours
-    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     # print("hierarchy test: ", hierarchy[0])
     contours = imutils.grab_contours([contours, hierarchy])  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
 
     # Process and draw contours
     for count, contour in enumerate(contours):
+        print("contour count: ", count)
         # Compute the center
         M = cv.moments(contour)
-        if int(M["m00"]) != 0:
+        if int(M["m00"]) > 100:  # only if area is larger than 100px
             center_x = int(M["m10"] / M["m00"])
             center_y = int(M["m01"] / M["m00"])
         
@@ -108,9 +109,11 @@ for count, mask_img in enumerate(mask_img_dict):
 # Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
 
 img_copy = mask_img_cntr_dict[0].copy()
+
+img_size = img.shape[:2]  # only need the columns and rows
+
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
-def label_func(contour):
-    img_size = img.shape[:2]  # only need the columns and rows
+def label_func(contour, img_size = img_size):
     raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
     for i in range(img_size[0]): 
         for j in range(img_size[1]):
