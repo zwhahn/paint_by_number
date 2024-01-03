@@ -85,6 +85,7 @@ def contour_func(input_img):
         # Compute the center
         M = cv.moments(contour)
         if int(M["m00"]) > 100:  # only if area is larger than 100px
+            print("Large area: ", count)
             center_x = int(M["m10"] / M["m00"])
             center_y = int(M["m01"] / M["m00"])
         
