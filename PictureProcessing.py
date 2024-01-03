@@ -110,7 +110,6 @@ for count, mask_img in enumerate(mask_img_dict):
 # Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
 
 img_copy = mask_img_cntr_dict[0].copy()
-
 img_size = img.shape[:2]  # only need the columns and rows
 
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
