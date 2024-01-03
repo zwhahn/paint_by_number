@@ -75,7 +75,7 @@ def contour_func(input_img):
     img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
 
     # Find contours
-    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
     # print("hierarchy test: ", hierarchy[0])
     contours = imutils.grab_contours([contours, hierarchy])  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
 
@@ -104,18 +104,17 @@ for count, mask_img in enumerate(mask_img_dict):
     mask_img_cntr_dict[count] = output_img
     cntr_dict[count] = contours
 
-print(type(cntr_dict[0][0]))
 
 '''LABELING'''
 # Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
 
-
+img_copy = mask_img_cntr_dict[0].copy()
+grayscale_image_for_label_func = cv.cvtColor(img_copy, cv.COLOR_BGR2GRAY)
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
-def label_func(contour):
-    img_gray = cv.cvtColor(mask_img_cntr_dict[0], cv.COLOR_BGR2GRAY)  # convert to grayscale
-    raw_dist = np.empty(img_gray.shape, dtype=np.float32)  # initialize numpy array for each pixel in img
-    for i in range(img_gray.shape[0]): 
-        for j in range(img_gray.shape[1]):
+def label_func(contour, grayscale_image_for_label_func = grayscale_image_for_label_func):
+    raw_dist = np.empty(grayscale_image_for_label_func.shape, dtype=np.float32)  # initialize numpy array for each pixel in img
+    for i in range(grayscale_image_for_label_func.shape[0]): 
+        for j in range(grayscale_image_for_label_func.shape[1]):
             if cv.pointPolygonTest(contour, (j, i), False) > 0:  # check if point is inside contour
                 raw_dist[i,j] = cv.pointPolygonTest(contour, (j,i), True)  # calculate distance  
                 # print("Inside Contour: ", raw_dist[i,j])
@@ -134,7 +133,7 @@ for count, contour in enumerate(contours):
 
 # Loop through all maxLoc and draw a circle there
 for location in maxLoc_dict:
-    print("Location: ", maxLoc_dict[location])
+    # print("Location: ", maxLoc_dict[location])
     cv.circle(mask_img_cntr_dict[0], maxLoc_dict[location], 7, (255, 255, 255), -1)
 
 
