@@ -90,7 +90,7 @@ def contour_func(input_img):
             cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 2)
 
             # # Only draw contours that don't have children
-            # if hierarchy[0][count][3] == -1: # or hierarchy[0][count][3] != -1:
+            # if hierarchy[0][count][3] == -1 or hierarchy[0][count][3] != -1:
             #     # Draw contour and center on image
             #     cv.circle(input_img_copy, (center_x, center_y), 7, (255, 255, 255), -1)
             #     # cv.putText(input_img_copy, "center", (center_x - 20, center_y - 20), 
@@ -103,7 +103,6 @@ for count, mask_img in enumerate(mask_img_dict):
     contours, output_img = contour_func(mask_img_dict[mask_img])
     mask_img_cntr_dict[count] = output_img
     cntr_dict[count] = contours
-
 
 '''LABELING'''
 # Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
@@ -123,14 +122,21 @@ def label_func(contour, grayscale_image_for_label_func = grayscale_image_for_lab
                 minVal, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
                 return maxLoc
 
+print("cntr_dict: ", len(cntr_dict))
+# print(cntr_dict[0])
 # Loop through all contours, find maxLoc and save to dictionary
 maxLoc_dict = {}
-for count, contour in enumerate(contours):
-    print("contour: ", type(contour))
-    print("contour shape: ", contour.shape)
-    maxLoc_dict[count] = label_func(contour)
+for count, contours in cntr_dict.items():
+    print("contours: ", contours)
+    for contour in contours:
+        x, y, z = contour.shape
+        # Only use the larger contours
+        if x > 100:
+            # print("contour: ", type(contour))
+            # print("contour shape: ", contour.shape)
+            maxLoc_dict[count] = label_func(contour)
 
-print("contourS: ", type(contours))
+# print("contourS: ", type(contours))
 
 # Loop through all maxLoc and draw a circle there
 for location in maxLoc_dict:
