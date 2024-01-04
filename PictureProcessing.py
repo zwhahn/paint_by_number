@@ -6,9 +6,9 @@ import imutils
 # Load original image
 # img = cv.imread("./pa_logo.png")
 # img = cv.imread("./golden_gate_bridge.jpg")
-img = cv.imread("./clifford.jpg")
+# img = cv.imread("./clifford.jpg")
 # img = cv.imread("./color_circles.jpg")
-# img = cv.imread("./brad_pitt.jpg")
+img = cv.imread("./brad_pitt.jpg")
 
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
@@ -81,11 +81,9 @@ def contour_func(input_img):
 
     # Process and draw contours
     for count, contour in enumerate(contours):
-        print("contour count: ", count)
         # Compute the center
         M = cv.moments(contour)
         if int(M["m00"]) > 100:  # only if area is larger than 100px
-            print("Large area: ", count)
             center_x = int(M["m10"] / M["m00"])
             center_y = int(M["m01"] / M["m00"])
         
@@ -113,38 +111,25 @@ img_copy = mask_img_cntr_dict[0].copy()
 img_size = img.shape[:2]  # only need the columns and rows
 
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
-def label_func(contour, img_size = img_size):
+def label_func(contour, mask_img, img_size = img_size):
     raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
     for i in range(img_size[0]): 
         for j in range(img_size[1]):
             if cv.pointPolygonTest(contour, (j, i), False) > 0:  # check if point is inside contour
-                # print("Inside contour")
-                raw_dist[i,j] = cv.pointPolygonTest(contour, (j,i), True)  # calculate distance  
-                minVal, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
-                return maxLoc
+                raw_dist[i,j] = cv.pointPolygonTest(contour, (j,i), True)  # calculate distance
+                _, _, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
+                cv.circle(mask_img, maxLoc, 7, (0, 0, 255), -1)
+                return
 
-# print("cntr_dict: ", len(cntr_dict))
-# print(cntr_dict[0])
-# Loop through all contours, find maxLoc and save to dictionary
-maxLoc_dict = {}
-for _, contours in cntr_dict.items():
-    # print("contours: ", contours)
-    for count, contour in enumerate(contours):
+# Loop through all contours
+for count, contours in cntr_dict.items():
+    num = 0
+    for contour in contours:
         x, y, z = contour.shape
-        # Only use the larger contours
-        if x > 100:
-            # print("contour: ", type(contour))
-            # print("contour shape: ", contour.shape)
-            maxLoc_dict[count] = label_func(contour)
-
-# print("contourS: ", type(contours))
-
-# Loop through all maxLoc and draw a circle there
-for count, location in enumerate(maxLoc_dict):
-    print("maxLoc length: ", len(maxLoc_dict))
-    cv.circle(mask_img_cntr_dict[0], maxLoc_dict[location], 7, (0, 0, 255), -1)
-    cv.putText(mask_img_cntr_dict[0], str(count+1), (maxLoc_dict[location][0] - 20, maxLoc_dict[location][1] - 20),  
-                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        if x > 100:  # only larger contours
+            num = num+1
+            print("count, num: ", count, num) 
+            label_func(contour, mask_img_cntr_dict[count])
 
 
 '''MULTI DISPLAY'''
