@@ -25,11 +25,11 @@ points = [ [1.5*r,1.34*r], [r,2*r], [1.5*r,2.866*r], [2.5*r,2.866*r],[3*r,2*r],[
 points = np.array(points,np.int0)
 cv2.polylines(src,[points],True,255,3)
 
-contours,hierarchy = cv2.findContours(src,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+contours,hierarchy = cv2.findContours(src,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
 res = np.zeros(src.shape,np.float32)                # array to store distances
 drawing = np.zeros((rows,cols,3),np.uint8)          # image to draw the distance
-cnt = contours[0]                                   # We take only one contour for testing
+cnt = contours[1]                                   # We take only one contour for testing
 print("contours: ", len(contours))
 print("cnt:", type(cnt))
 print("cnt shape:", cnt.shape)
@@ -41,7 +41,10 @@ for i in range(rows):
 
 # Confirm logic
 minVal, maxVal, _, maxLoc = cv2.minMaxLoc(res)  # calculate max location (maxLoc)
-cv2.circle(drawing, maxLoc, 7, (255, 255, 255), -1) # draw cirlce
+cv2.circle(drawing, maxLoc, 7, (255, 0, 0), -1) # draw cirlce
+cv2.circle(drawing, maxLoc, int(maxVal), (255, 255, 255), 1, cv2.LINE_8, 0)
+print("maxVal: ", maxVal)
+
 
 mini,maxi = np.abs(cv2.minMaxLoc(res)[:2])          # Find minimum and maximum to adjust colors
 mini = 255.0/mini
