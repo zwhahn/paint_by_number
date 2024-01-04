@@ -112,7 +112,8 @@ img_size = img.shape[:2]  # only need the columns and rows
 
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
 def label_func(contour, mask_img, img_size = img_size):
-    print("cnt shape: ", contour.shape)
+    print("contour type:", type(contour))
+    print("contour shape: ", contour.shape)
     raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
     for i in range(img_size[0]): 
         for j in range(img_size[1]):
@@ -122,18 +123,20 @@ def label_func(contour, mask_img, img_size = img_size):
                 _, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
                 cv.circle(mask_img, maxLoc, 7, (0, 0, 255), -1)
                 cv.circle(mask_img, maxLoc, int(maxVal), (0, 0, 255), 1, cv.LINE_8, 0)
-                print("maxVal: ", maxVal)
-                return
+                # print("maxVal: ", maxVal)
+    return
 
 # Loop through all contours
-for count, contours in cntr_dict.items():
-    num = 0
-    for contour in contours:
-        x, y, z = contour.shape
-        if x > 100:  # only larger contours
-            num = num+1
-            # print("count, num: ", count, num) 
-            label_func(contour, mask_img_cntr_dict[count])
+num = 0
+for count, mask in cntr_dict.items():
+    print("Number of contours: ", len(mask))
+    for contour in mask:
+        if num < 1:
+            x, y, z = contour.shape
+            if x > 100:  # only larger contours
+                # print("num: ", num) 
+                num = num+1
+                label_func(contour, mask_img_cntr_dict[count])
 
 
 '''MULTI DISPLAY'''
