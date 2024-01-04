@@ -88,13 +88,6 @@ def contour_func(input_img):
             center_y = int(M["m01"] / M["m00"])
         
             cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 2)
-
-            # # Only draw contours that don't have children
-            # if hierarchy[0][count][3] == -1 or hierarchy[0][count][3] != -1:
-            #     # Draw contour and center on image
-            #     cv.circle(input_img_copy, (center_x, center_y), 7, (255, 255, 255), -1)
-            #     # cv.putText(input_img_copy, "center", (center_x - 20, center_y - 20), 
-            #             # cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
     return contours, input_img_copy
 
 mask_img_cntr_dict = {}
@@ -112,29 +105,23 @@ img_size = img.shape[:2]  # only need the columns and rows
 
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
 def label_func(contour, mask_img, img_size = img_size):
-    print("contour type:", type(contour))
-    print("contour shape: ", contour.shape)
     raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
     for i in range(img_size[0]): 
         for j in range(img_size[1]):
             if cv.pointPolygonTest(contour, (j, i), False) > 0:  # check if point is inside contour
-                # raw_dist[i,j] = cv.pointPolygonTest(contour, (j,i), True)  # calculate distance
                 raw_dist.itemset((i,j),cv.pointPolygonTest(contour,(j,i),True))
     _, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
     cv.circle(mask_img, maxLoc, 7, (0, 0, 255), -1)
     cv.circle(mask_img, maxLoc, int(maxVal), (0, 0, 255), 1, cv.LINE_8, 0)
-    # print("maxVal: ", maxVal)
     return
 
 # Loop through all contours
-num = 0
+num = 0  # used to limit number of contours (speed up testing) 
 for count, mask in cntr_dict.items():
-    print("Number of contours: ", len(mask))
     for contour in mask:
         x, y, z = contour.shape
         if x > 100:  # only larger contours
-            # print("num: ", num) 
-            num = num+1
+            num = num + 1
             label_func(contour, mask_img_cntr_dict[count])
 
 
@@ -184,7 +171,6 @@ plt.title("Mask 1 w/ Contour")
 cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
-# cv.imshow("Test Image", img_test)
 
 
 cv.waitKey(0)  # keep images open until any key is pressed
