@@ -120,10 +120,10 @@ def label_func(contour, mask_img, img_size = img_size):
             if cv.pointPolygonTest(contour, (j, i), False) > 0:  # check if point is inside contour
                 # raw_dist[i,j] = cv.pointPolygonTest(contour, (j,i), True)  # calculate distance
                 raw_dist.itemset((i,j),cv.pointPolygonTest(contour,(j,i),True))
-                _, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
-                cv.circle(mask_img, maxLoc, 7, (0, 0, 255), -1)
-                cv.circle(mask_img, maxLoc, int(maxVal), (0, 0, 255), 1, cv.LINE_8, 0)
-                # print("maxVal: ", maxVal)
+    _, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
+    cv.circle(mask_img, maxLoc, 7, (0, 0, 255), -1)
+    cv.circle(mask_img, maxLoc, int(maxVal), (0, 0, 255), 1, cv.LINE_8, 0)
+    # print("maxVal: ", maxVal)
     return
 
 # Loop through all contours
