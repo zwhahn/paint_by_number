@@ -57,6 +57,9 @@ mask_img_dict = {}
 for count, mask in enumerate(mask_dict):
     mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
 
+empty_img_dict = {}
+for count, mask in mask_img_dict.items():
+    empty_img_dict[count] = np.zeros_like(mask_img_dict[count]) 
 
 # '''EDGE DETECTION'''
 # # Detect image edges
@@ -112,6 +115,7 @@ img_size = img.shape[:2]  # only need the columns and rows
 
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
 def label_func(contour, mask_img, img_size = img_size):
+    print("cnt shape: ", contour.shape)
     raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
     for i in range(img_size[0]): 
         for j in range(img_size[1]):
@@ -131,8 +135,8 @@ for count, contours in cntr_dict.items():
         if x > 100:  # only larger contours
             num = num+1
             # print("count, num: ", count, num) 
-            label_func(contour, mask_img_cntr_dict[count])
-
+            label_func(contour, empty_img_dict[count])
+            # pass
 
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
@@ -177,10 +181,10 @@ plt.title("Mask 1 w/ Contour")
 # cv.imshow("Mask Image 1", mask_img_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
-cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
+# cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
-# cv.imshow("Test Image", img_test)
+cv.imshow("Empty Image", empty_img_dict[0])
 
 
 cv.waitKey(0)  # keep images open until any key is pressed
