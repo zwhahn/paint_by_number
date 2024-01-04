@@ -75,7 +75,7 @@ def contour_func(input_img):
     img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
 
     # Find contours
-    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     # print("hierarchy test: ", hierarchy[0])
     contours = imutils.grab_contours([contours, hierarchy])  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
 
@@ -83,25 +83,46 @@ def contour_func(input_img):
     for count, contour in enumerate(contours):
         # Compute the center
         M = cv.moments(contour)
-        if int(M["m00"]) != 0:
+        if int(M["m00"]) > 100:  # only if area is larger than 100px
             center_x = int(M["m10"] / M["m00"])
             center_y = int(M["m01"] / M["m00"])
-
-            # Only draw contours that don't have children
-            if hierarchy[0][count][2] == -1:  
-                # Draw contour and center on image
-                cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 2)
-                cv.circle(input_img_copy, (center_x, center_y), 7, (255, 255, 255), -1)
-                # cv.putText(input_img_copy, "center", (center_x - 20, center_y - 20), 
-                        # cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-    return input_img_copy
+        
+            cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 2)
+    return contours, input_img_copy
 
 mask_img_cntr_dict = {}
+cntr_dict = {}  # dict with a list of numpy arrays, each array represents a contour
 for count, mask_img in enumerate(mask_img_dict):
-    mask_img_cntr_dict[count] = contour_func(mask_img_dict[mask_img])
+    contours, output_img = contour_func(mask_img_dict[mask_img])
+    mask_img_cntr_dict[count] = output_img
+    cntr_dict[count] = contours
 
+'''LABELING'''
+# Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
 
-'''SECTIONING'''
+img_copy = mask_img_cntr_dict[0].copy()
+img_size = img.shape[:2]  # only need the columns and rows
+
+# Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
+def label_func(contour, mask_img, img_size = img_size):
+    raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
+    for i in range(img_size[0]): 
+        for j in range(img_size[1]):
+            if cv.pointPolygonTest(contour, (j, i), False) > 0:  # check if point is inside contour
+                raw_dist.itemset((i,j),cv.pointPolygonTest(contour,(j,i),True))
+    _, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
+    cv.circle(mask_img, maxLoc, 7, (0, 0, 255), -1)
+    cv.circle(mask_img, maxLoc, int(maxVal), (0, 0, 255), 1, cv.LINE_8, 0)
+    return
+
+# Loop through all contours
+num = 0  # used to limit number of contours (speed up testing) 
+for count, mask in cntr_dict.items():
+    for contour in mask:
+        x, y, z = contour.shape
+        if x > 100:  # only larger contours
+            num = num + 1
+            label_func(contour, mask_img_cntr_dict[count])
 
 
 '''MULTI DISPLAY'''
@@ -141,10 +162,10 @@ plt.title("Mask 1 w/ Contour")
 '''IMAGES TO SHOW'''
 # cv.imshow("Original Image", img)
 # cv.imshow("Blurred Image", img_blur)
-cv.imshow("Simplified Image", img_simplified)
+# cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
-cv.imshow("Mask Image 1", mask_img_dict[0])
+# cv.imshow("Mask Image 1", mask_img_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
 cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
