@@ -116,13 +116,14 @@ def label_func(contour, mask_img, img_size = img_size):
     return
 
 # Loop through all contours
-num = 0  # used to limit number of contours (speed up testing) 
+contour_limit = 0  # used to limit number of contours (speed up testing) 
 for count, mask in cntr_dict.items():
     for contour in mask:
         x, y, z = contour.shape
-        if x > 100:  # only larger contours
-            num = num + 1
-            label_func(contour, mask_img_cntr_dict[count])
+        if contour_limit < 2: # Contour limit
+            if x > 100:  # only larger contours
+                contour_limit = contour_limit + 1
+                label_func(contour, mask_img_cntr_dict[count])
 
 
 '''MULTI DISPLAY'''
