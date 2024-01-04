@@ -57,9 +57,6 @@ mask_img_dict = {}
 for count, mask in enumerate(mask_dict):
     mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
 
-empty_img_dict = {}
-for count, mask in mask_img_dict.items():
-    empty_img_dict[count] = np.zeros_like(mask_img_dict[count]) 
 
 # '''EDGE DETECTION'''
 # # Detect image edges
@@ -135,8 +132,8 @@ for count, contours in cntr_dict.items():
         if x > 100:  # only larger contours
             num = num+1
             # print("count, num: ", count, num) 
-            label_func(contour, empty_img_dict[count])
-            # pass
+            label_func(contour, mask_img_cntr_dict[count])
+
 
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
@@ -181,10 +178,10 @@ plt.title("Mask 1 w/ Contour")
 # cv.imshow("Mask Image 1", mask_img_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
-# cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
+cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
-cv.imshow("Empty Image", empty_img_dict[0])
+# cv.imshow("Test Image", img_test)
 
 
 cv.waitKey(0)  # keep images open until any key is pressed
