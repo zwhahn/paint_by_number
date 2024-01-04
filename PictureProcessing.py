@@ -131,12 +131,11 @@ num = 0
 for count, mask in cntr_dict.items():
     print("Number of contours: ", len(mask))
     for contour in mask:
-        if num < 1:
-            x, y, z = contour.shape
-            if x > 100:  # only larger contours
-                # print("num: ", num) 
-                num = num+1
-                label_func(contour, mask_img_cntr_dict[count])
+        x, y, z = contour.shape
+        if x > 100:  # only larger contours
+            # print("num: ", num) 
+            num = num+1
+            label_func(contour, mask_img_cntr_dict[count])
 
 
 '''MULTI DISPLAY'''
