@@ -121,7 +121,7 @@ def label_func(contour, mask_img, img_size = img_size):
 
 def to_fill_or_not_to_fill(contour_hierarchy):
     # If there is no parent or child 
-    if contour_hierarchy[2] == -1 and contour_hierarchy[2] == -1:
+    if contour_hierarchy[2] == -1 and contour_hierarchy[3] == -1:
         return True
 
 # Loop through all contours
@@ -129,7 +129,7 @@ contour_limit = 0  # used to limit number of contours (speed up testing)
 for count, mask in cntr_dict.items():
     for i, contour in enumerate(mask):
         x, y, z = contour.shape
-        if contour_limit < 3: # Contour limit
+        if contour_limit < 100: # Contour limit
             if x > 100:   # only larger contours
                 fill = to_fill_or_not_to_fill(hierarchy_dict[count][0][i])  # check if contour should be filled or not before labeling
                 if fill:
