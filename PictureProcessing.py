@@ -75,7 +75,7 @@ def contour_func(input_img):
     img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
 
     # Find contours
-    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     # print("hierarchy test: ", hierarchy[0])
     contours = imutils.grab_contours([contours, hierarchy])  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
 
@@ -83,19 +83,21 @@ def contour_func(input_img):
     for count, contour in enumerate(contours):
         # Compute the center
         M = cv.moments(contour)
-        if int(M["m00"]) > 100:  # only if area is larger than 100px
+        if int(M["m00"]):  # only if area is larger than 100px
             center_x = int(M["m10"] / M["m00"])
             center_y = int(M["m01"] / M["m00"])
         
-            cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 2)
-    return contours, input_img_copy
+            cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 1)
+    return hierarchy, contours, input_img_copy
 
 mask_img_cntr_dict = {}
+hierarchy_dict = {}
 cntr_dict = {}  # dict with a list of numpy arrays, each array represents a contour
 for count, mask_img in enumerate(mask_img_dict):
-    contours, output_img = contour_func(mask_img_dict[mask_img])
+    hierarchy, contours, output_img = contour_func(mask_img_dict[mask_img])
     mask_img_cntr_dict[count] = output_img
     cntr_dict[count] = contours
+    hierarchy_dict[count] = hierarchy
 
 '''LABELING'''
 # Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
@@ -120,7 +122,7 @@ contour_limit = 0  # used to limit number of contours (speed up testing)
 for count, mask in cntr_dict.items():
     for contour in mask:
         x, y, z = contour.shape
-        if contour_limit < 2: # Contour limit
+        if contour_limit < 3: # Contour limit
             if x > 100:  # only larger contours
                 contour_limit = contour_limit + 1
                 label_func(contour, mask_img_cntr_dict[count])
