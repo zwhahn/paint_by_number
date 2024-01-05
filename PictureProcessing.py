@@ -99,6 +99,7 @@ for count, mask_img in enumerate(mask_img_dict):
     cntr_dict[count] = contours
     hierarchy_dict[count] = hierarchy
 
+print(hierarchy_dict[0])
 '''LABELING'''
 # Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
 
@@ -117,15 +118,23 @@ def label_func(contour, mask_img, img_size = img_size):
     cv.circle(mask_img, maxLoc, int(maxVal), (0, 0, 255), 1, cv.LINE_8, 0)
     return
 
+
+def to_fill_or_not_to_fill(contour_hierarchy):
+    # If there is no parent or child 
+    if contour_hierarchy[2] == -1 and contour_hierarchy[2] == -1:
+        return True
+
 # Loop through all contours
 contour_limit = 0  # used to limit number of contours (speed up testing) 
 for count, mask in cntr_dict.items():
-    for contour in mask:
+    for i, contour in enumerate(mask):
         x, y, z = contour.shape
         if contour_limit < 3: # Contour limit
-            if x > 100:  # only larger contours
-                contour_limit = contour_limit + 1
-                label_func(contour, mask_img_cntr_dict[count])
+            if x > 100:   # only larger contours
+                fill = to_fill_or_not_to_fill(hierarchy_dict[count][0][i])  # check if contour should be filled or not before labeling
+                if fill:
+                    contour_limit = contour_limit + 1
+                    label_func(contour, mask_img_cntr_dict[count])
 
 
 '''MULTI DISPLAY'''
