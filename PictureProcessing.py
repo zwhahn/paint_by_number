@@ -118,17 +118,34 @@ def label_func(contour, mask_img, img_size = img_size):
     cv.circle(mask_img, maxLoc, int(maxVal), (0, 0, 255), 1, cv.LINE_8, 0)
     return
 
+def contour_family_label(contours, hierarchy, img_size=img_size):
+    for i, contour in enumerate(contours):  # loop through each contour
+        if hierarchy[0][i][3] == -1:  # check if contour has no parent
+            mask = np.zeros_like(img_size)
+            cv.drawContours(mask, [contour], -1, (255), thickness=cv.FILLED)
+
+            # Exclude holes by drawing child contours in black
+            for j, child_contour in enumerate(contours)
+                if hierarchy[0][j][3] == i:  # if parent is current contour
+                    cv.drawContours(mask, [child_contour], -1, (0), thickness=cv.FILLED)
+            
+            dist_transform = cv.distanceTransform(mask, cv.DIST_L2, 5)
+
+            _,_,_, max_loc = cv.minMaxLoc(dist_transform)
+
+            return max_loc
 
 # Loop through all contours
 contour_limit = 0  # used to limit number of contours (speed up testing) 
-for count, mask in cntr_dict.items():
-    for i, contour in enumerate(mask):
+for i, contours in cntr_dict.items():
+    for j, contour in enumerate(contours):
+        print(contour_family_label(contours, hierarchy_dict[i]))
         # print(hierarchy_dict[count])
-        x, y, z = contour.shape
-        if contour_limit < 10: # Contour limit
-            if x > 100:   # only larger contours
-                contour_limit = contour_limit + 1
-                label_func(contour, mask_img_cntr_dict[count])
+        # x, y, z = contour.shape
+        # if contour_limit < 10: # Contour limit
+        #     if x > 100:   # only larger contours
+        #         contour_limit = contour_limit + 1
+        #         label_func(contour, mask_img_cntr_dict[i])
 
 
 '''MULTI DISPLAY'''
