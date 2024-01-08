@@ -10,6 +10,9 @@ import imutils
 # img = cv.imread("./color_circles.jpg")
 img = cv.imread("./brad_pitt.jpg")
 
+# Threshold the image to binary using Otsu's method
+_, binary = cv.threshold(img, 0, 255, cv.THRESH_BINARY_INV)
+
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
@@ -83,7 +86,7 @@ def contour_func(input_img):
     for count, contour in enumerate(contours):
         # Compute the center
         M = cv.moments(contour)
-        if int(M["m00"]):  # only if area is larger than 100px
+        if int(M["m00"]) > 100:  # only if area is larger than 100px
             center_x = int(M["m10"] / M["m00"])
             center_y = int(M["m01"] / M["m00"])
         
@@ -106,6 +109,8 @@ print(hierarchy_dict[0].shape)
 img_copy = mask_img_cntr_dict[0].copy()
 img_size = img.shape[:2]  # only need the columns and rows
 
+print("img size: ", img_size)
+
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
 def label_func(contour, mask_img, img_size = img_size):
     raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
@@ -118,28 +123,44 @@ def label_func(contour, mask_img, img_size = img_size):
     cv.circle(mask_img, maxLoc, int(maxVal), (0, 0, 255), 1, cv.LINE_8, 0)
     return
 
-def contour_family_label(contours, hierarchy, img_size=img_size):
-    for i, contour in enumerate(contours):  # loop through each contour
-        if hierarchy[0][i][3] == -1:  # check if contour has no parent
-            mask = np.zeros_like(img_size)
-            cv.drawContours(mask, [contour], -1, (255), thickness=cv.FILLED)
+def contour_family_label(contours, hierarchy, img_size = img_size):
+    # for i, contour in enumerate(contours):  # loop through each contour
+    #     print("Sub mask, contour number: ", i)
+    M = cv.moments(contours)
+    if hierarchy[0][i][3] == -1 and int(M["m00"]) > 100:  # check if contour has no parent
+        # print("contour: ", contour)
+        
+        # print("Area: ", int(M["m00"]))
+        print("Contour has no parent")
+        mask = np.zeros((img_size[0], img_size[1], 3), dtype=np.uint8)
+        print("mask shape: ", mask.shape)
+        print("contour shape: ", contour.shape)
+        cv.drawContours(mask, [contour], -1, (0,255,0), cv.FILLED)
+        
+        # Exclude holes by drawing child contours in black
+        for j, child_contour in enumerate(contours):
+            if hierarchy[0][j][3] == i:  # if parent is current contour
+                cv.drawContours(mask, [child_contour], -1, (0), thickness=cv.FILLED)
+        
+        # print("contour: ", contour)
+        # print("mask: ", mask)
+        
+        dist_transform = cv.distanceTransform(mask, cv.DIST_L2, 5)
 
-            # Exclude holes by drawing child contours in black
-            for j, child_contour in enumerate(contours)
-                if hierarchy[0][j][3] == i:  # if parent is current contour
-                    cv.drawContours(mask, [child_contour], -1, (0), thickness=cv.FILLED)
-            
-            dist_transform = cv.distanceTransform(mask, cv.DIST_L2, 5)
+        # _,_,_, max_loc = cv.minMaxLoc(dist_transform)
 
-            _,_,_, max_loc = cv.minMaxLoc(dist_transform)
-
-            return max_loc
+        return 
 
 # Loop through all contours
 contour_limit = 0  # used to limit number of contours (speed up testing) 
 for i, contours in cntr_dict.items():
+    print("Mask Number: ", i)
+
+    # print(contour_family_label(contours, hierarchy_dict[i]))
     for j, contour in enumerate(contours):
         print(contour_family_label(contours, hierarchy_dict[i]))
+        print("J: ", j)
+    #     print(contour_family_label(contours, hierarchy_dict[i]))
         # print(hierarchy_dict[count])
         # x, y, z = contour.shape
         # if contour_limit < 10: # Contour limit
