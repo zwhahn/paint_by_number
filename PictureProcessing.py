@@ -127,7 +127,8 @@ def contour_family_label(contours, hierarchy, img_size = img_size):
     for i, contour in enumerate(contours):  # loop through each contour
         print("Sub mask, contour number: ", i)
         M = cv.moments(contour)
-        if hierarchy[0][i][3] == -1 and int(M["m00"]) > 100:  # check if contour has no parent
+        print("Area: ", M["m00"])
+        if hierarchy[0][i][3] == -1 and int(M["m00"]) > 200:  # check if contour has no parent
             mask = np.zeros((img_size[0], img_size[1], 3), dtype=np.uint8)
             cv.drawContours(mask, [contour], -1, (0,255,0), cv.FILLED)
             
@@ -136,14 +137,18 @@ def contour_family_label(contours, hierarchy, img_size = img_size):
                 if hierarchy[0][j][3] == i:  # if parent is current contour
                     cv.drawContours(mask, [child_contour], -1, (0), thickness=cv.FILLED)
             
-            # print("contour: ", contour)
-            # print("mask: ", mask)
+            gray = cv.cvtColor(mask, cv.COLOR_BGR2GRAY)
+            out = cv.convertScaleAbs(gray)
+            print("image shape: ", out.shape)
+            # print("mask: ", mask)r
+            cv.imshow("mask", out)
+            cv.waitKey(0)
             
-            # dist_transform = cv.distanceTransform(mask, cv.DIST_L2, 5)
+            dist_transform = cv.distanceTransform(out, cv.DIST_L2, 3)
 
-            # _,_,_, max_loc = cv.minMaxLoc(dist_transform)
+            _,_,_, max_loc = cv.minMaxLoc(dist_transform)
 
-    return 
+    return max_loc
 
 # Loop through all contours
 contour_limit = 0  # used to limit number of contours (speed up testing) 
