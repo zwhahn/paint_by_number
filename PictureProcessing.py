@@ -124,6 +124,7 @@ def label_func(contour, mask_img, img_size = img_size):
     return
 
 def contour_family_label(contours, hierarchy, img_size = img_size):
+    max_loc_list = []
     # Loop through each contour
     for i, contour in enumerate(contours):
         M = cv.moments(contour)  # calculate shape attributes  
@@ -145,13 +146,19 @@ def contour_family_label(contours, hierarchy, img_size = img_size):
             
             dist_transform = cv.distanceTransform(out, cv.DIST_L2, 3)
             _,_,_, max_loc = cv.minMaxLoc(dist_transform)
+            max_loc_list.append(max_loc)
 
-    return max_loc
+    return max_loc_list
 
+label_locations_dict = {}
 # Loop through all contours
-contour_limit = 0  # used to limit number of contours (speed up testing) 
 for i, contours in cntr_dict.items():
-    print(contour_family_label(contours, hierarchy_dict[i]))
+    label_locations_dict[i] = contour_family_label(contours, hierarchy_dict[i])
+
+# Loop through max_loc positions and mark them
+for i, label_location_list in enumerate(label_locations_dict.items()):
+    for label_location in label_location_list[1]:
+        cv.circle(mask_img_cntr_dict[i], label_location, 7, (0, 0, 255), -1)
 
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
