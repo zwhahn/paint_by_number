@@ -124,41 +124,40 @@ def label_func(contour, mask_img, img_size = img_size):
     return
 
 def contour_family_label(contours, hierarchy, img_size = img_size):
-    # for i, contour in enumerate(contours):  # loop through each contour
-    #     print("Sub mask, contour number: ", i)
-    M = cv.moments(contours)
-    if hierarchy[0][i][3] == -1 and int(M["m00"]) > 100:  # check if contour has no parent
-        # print("contour: ", contour)
-        
-        # print("Area: ", int(M["m00"]))
-        print("Contour has no parent")
-        mask = np.zeros((img_size[0], img_size[1], 3), dtype=np.uint8)
-        print("mask shape: ", mask.shape)
-        print("contour shape: ", contour.shape)
-        cv.drawContours(mask, [contour], -1, (0,255,0), cv.FILLED)
-        
-        # Exclude holes by drawing child contours in black
-        for j, child_contour in enumerate(contours):
-            if hierarchy[0][j][3] == i:  # if parent is current contour
-                cv.drawContours(mask, [child_contour], -1, (0), thickness=cv.FILLED)
-        
-        # print("contour: ", contour)
-        # print("mask: ", mask)
-        
-        dist_transform = cv.distanceTransform(mask, cv.DIST_L2, 5)
+    for i, contour in enumerate(contours):  # loop through each contour
+        print("Sub mask, contour number: ", i)
+        M = cv.moments(contour)
+        if hierarchy[0][i][3] == -1: # and int(M["m00"]) > 100:  # check if contour has no parent
+            # print("contour: ", contour)
+            
+            # print("Area: ", int(M["m00"]))
+            print("Contour has no parent")
+            mask = np.zeros((img_size[0], img_size[1], 3), dtype=np.uint8)
+            print("mask shape: ", mask.shape)
+            print("contour shape: ", contour.shape)
+            cv.drawContours(mask, [contour], -1, (0,255,0), cv.FILLED)
+            
+            # Exclude holes by drawing child contours in black
+            for j, child_contour in enumerate(contours):
+                if hierarchy[0][j][3] == i:  # if parent is current contour
+                    cv.drawContours(mask, [child_contour], -1, (0), thickness=cv.FILLED)
+            
+            # print("contour: ", contour)
+            # print("mask: ", mask)
+            
+            # dist_transform = cv.distanceTransform(mask, cv.DIST_L2, 5)
 
-        # _,_,_, max_loc = cv.minMaxLoc(dist_transform)
+            # _,_,_, max_loc = cv.minMaxLoc(dist_transform)
 
-        return 
+    return 
 
 # Loop through all contours
 contour_limit = 0  # used to limit number of contours (speed up testing) 
 for i, contours in cntr_dict.items():
     print("Mask Number: ", i)
-
+    print(contour_family_label(contours, hierarchy_dict[i]))
     # print(contour_family_label(contours, hierarchy_dict[i]))
     for j, contour in enumerate(contours):
-        print(contour_family_label(contours, hierarchy_dict[i]))
         print("J: ", j)
     #     print(contour_family_label(contours, hierarchy_dict[i]))
         # print(hierarchy_dict[count])
