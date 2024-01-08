@@ -124,28 +124,26 @@ def label_func(contour, mask_img, img_size = img_size):
     return
 
 def contour_family_label(contours, hierarchy, img_size = img_size):
-    for i, contour in enumerate(contours):  # loop through each contour
-        print("Sub mask, contour number: ", i)
-        M = cv.moments(contour)
-        print("Area: ", M["m00"])
-        if hierarchy[0][i][3] == -1 and int(M["m00"]) > 200:  # check if contour has no parent
-            mask = np.zeros((img_size[0], img_size[1], 3), dtype=np.uint8)
-            cv.drawContours(mask, [contour], -1, (0,255,0), cv.FILLED)
+    # Loop through each contour
+    for i, contour in enumerate(contours):
+        M = cv.moments(contour)  # calculate shape attributes  
+        area = int(M["m00"])
+        if hierarchy[0][i][3] == -1 and area > 200:  # check if contour has no parent and area is big enough
+            mask = np.zeros((img_size[0], img_size[1], 3), dtype=np.uint8)  # initialize mask (blank image)
+            cv.drawContours(mask, [contour], -1, (0,255,0), cv.FILLED)  # draw larger, filled contour
             
             # Exclude holes by drawing child contours in black
-            for j, child_contour in enumerate(contours):
-                if hierarchy[0][j][3] == i:  # if parent is current contour
+            for j, child_contour in enumerate(contours): # loop through contours again
+                if hierarchy[0][j][3] == i:  # if parent is current contour then draw it in black
                     cv.drawContours(mask, [child_contour], -1, (0), thickness=cv.FILLED)
             
+            # Convery image to correct format for distanceTransform
             gray = cv.cvtColor(mask, cv.COLOR_BGR2GRAY)
             out = cv.convertScaleAbs(gray)
-            print("image shape: ", out.shape)
-            # print("mask: ", mask)r
-            cv.imshow("mask", out)
-            cv.waitKey(0)
+            # cv.imshow("mask", out)
+            # cv.waitKey(0)
             
             dist_transform = cv.distanceTransform(out, cv.DIST_L2, 3)
-
             _,_,_, max_loc = cv.minMaxLoc(dist_transform)
 
     return max_loc
