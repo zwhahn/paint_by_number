@@ -16,6 +16,7 @@ _, binary = cv.threshold(img, 0, 255, cv.THRESH_BINARY_INV)
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
+area_limit = 200
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
@@ -86,7 +87,7 @@ def contour_func(input_img):
     for count, contour in enumerate(contours):
         # Compute the center
         M = cv.moments(contour)
-        if int(M["m00"]) > 100:  # only if area is larger than 100px
+        if int(M["m00"]) > area_limit:  # only if area is large enough
             center_x = int(M["m10"] / M["m00"])
             center_y = int(M["m01"] / M["m00"])
         
@@ -102,14 +103,10 @@ for count, mask_img in enumerate(mask_img_dict):
     cntr_dict[count] = contours
     hierarchy_dict[count] = hierarchy
 
-print(hierarchy_dict[0].shape)
-'''LABELING'''
-# Following method from openCV docs (https://docs.opencv.org/3.4/dc/d48/tutorial_point_polygon_test.html)
 
+'''LABELING'''
 img_copy = mask_img_cntr_dict[0].copy()
 img_size = img.shape[:2]  # only need the columns and rows
-
-print("img size: ", img_size)
 
 # Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
 def label_func(contour, mask_img, img_size = img_size):
@@ -129,7 +126,7 @@ def contour_family_label(contours, hierarchy, img_size = img_size):
     for i, contour in enumerate(contours):
         M = cv.moments(contour)  # calculate shape attributes  
         area = int(M["m00"])
-        if hierarchy[0][i][3] == -1 and area > 200:  # check if contour has no parent and area is big enough
+        if area > area_limit:  # check if contour has no parent and area is big enough
             mask = np.zeros((img_size[0], img_size[1], 3), dtype=np.uint8)  # initialize mask (blank image)
             cv.drawContours(mask, [contour], -1, (0,255,0), cv.FILLED)  # draw larger, filled contour
             
