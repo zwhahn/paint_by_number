@@ -16,7 +16,6 @@ _, binary = cv.threshold(img, 0, 255, cv.THRESH_BINARY_INV)
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
-area_limit = 200
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
@@ -105,18 +104,20 @@ for count, mask_img in enumerate(mask_img_dict):
 img_copy = mask_img_cntr_dict[0].copy()
 img_size = img.shape[:2]  # only need the columns and rows
 
-# Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
-def label_func(contour, mask_img, img_size = img_size):
-    raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
-    for i in range(img_size[0]): 
-        for j in range(img_size[1]):
-            if cv.pointPolygonTest(contour, (j, i), False) > 0:  # check if point is inside contour
-                raw_dist.itemset((i,j),cv.pointPolygonTest(contour,(j,i),True))
-    _, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
-    cv.circle(mask_img, maxLoc, 7, (0, 0, 255), -1)
-    cv.circle(mask_img, maxLoc, int(maxVal), (0, 0, 255), 1, cv.LINE_8, 0)
-    return
+# Add border to ensure distanceTransform recognizes edge of photo
+border_size = 1
+def add_border(image, border_size=border_size):
+    border_img = cv.copyMakeBorder(image, 
+                                   top= border_size,
+                                   bottom= border_size,
+                                   left= border_size,
+                                   right= border_size,
+                                   borderType= cv.BORDER_CONSTANT,
+                                   value= [0, 0, 0])
+    return border_img
 
+area_limit = 500  # Don't label feature that is too small
+width_limit = 10  # Don't label feature that is too thin
 def contour_family_label(contours, hierarchy, img_size = img_size):
     max_loc_list = []
     # Loop through each contour
@@ -132,15 +133,19 @@ def contour_family_label(contours, hierarchy, img_size = img_size):
                 if hierarchy[0][j][3] == i:  # if parent is current contour then draw it in black
                     cv.drawContours(mask, [child_contour], -1, (0), thickness=cv.FILLED)
             
+            # Add border
+            img_border = add_border(mask)
+
             # Convery image to correct format for distanceTransform
-            gray = cv.cvtColor(mask, cv.COLOR_BGR2GRAY)
+            gray = cv.cvtColor(img_border, cv.COLOR_BGR2GRAY)
             out = cv.convertScaleAbs(gray)
             # cv.imshow("mask", out)
             # cv.waitKey(0)
             
             dist_transform = cv.distanceTransform(out, cv.DIST_L2, 3)
-            _,_,_, max_loc = cv.minMaxLoc(dist_transform)
-            max_loc_list.append(max_loc)
+            _,max_val,_, max_loc = cv.minMaxLoc(dist_transform)
+            if max_val > width_limit:
+                max_loc_list.append(max_loc)
 
     return max_loc_list
 
@@ -152,12 +157,12 @@ for i, contours in cntr_dict.items():
 # Loop through max_loc positions and mark them
 for i, label_location_list in enumerate(label_locations_dict.items()):
     for label_location in label_location_list[1]:
-        # Check if location is black or not, if black don't mark
+        # If area is not filled with color don't mark
         b_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 0]
         g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
         r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
-        if b_color + g_color + r_color != 0:
-            cv.circle(mask_img_cntr_dict[i], label_location, 7, (0, 0, 255), -1)
+        if b_color != 0 or g_color != 0 or r_color != 0:
+            cv.circle(mask_img_cntr_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 255), -1)
 
 
 '''MULTI DISPLAY'''
