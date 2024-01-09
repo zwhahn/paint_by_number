@@ -157,7 +157,12 @@ for i, contours in cntr_dict.items():
 # Loop through max_loc positions and mark them
 for i, label_location_list in enumerate(label_locations_dict.items()):
     for label_location in label_location_list[1]:
-        cv.circle(mask_img_cntr_dict[i], label_location, 7, (0, 0, 255), -1)
+        # Check if location is black or not, if black don't mark
+        b_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 0]
+        g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
+        r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
+        if b_color + g_color + r_color != 0:
+            cv.circle(mask_img_cntr_dict[i], label_location, 7, (0, 0, 255), -1)
 
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
