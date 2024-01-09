@@ -105,18 +105,6 @@ for count, mask_img in enumerate(mask_img_dict):
 img_copy = mask_img_cntr_dict[0].copy()
 img_size = img.shape[:2]  # only need the columns and rows
 
-# Loop through all pixels in img and calculate distances to the contour, positive value means its inside of contour
-def label_func(contour, mask_img, img_size = img_size):
-    raw_dist = np.empty(img_size, dtype=np.float32)  # initialize numpy array for each pixel in img
-    for i in range(img_size[0]): 
-        for j in range(img_size[1]):
-            if cv.pointPolygonTest(contour, (j, i), False) > 0:  # check if point is inside contour
-                raw_dist.itemset((i,j),cv.pointPolygonTest(contour,(j,i),True))
-    _, maxVal, _, maxLoc = cv.minMaxLoc(raw_dist)  # calculate max location (maxLoc)
-    cv.circle(mask_img, maxLoc, 7, (0, 0, 255), -1)
-    cv.circle(mask_img, maxLoc, int(maxVal), (0, 0, 255), 1, cv.LINE_8, 0)
-    return
-
 def contour_family_label(contours, hierarchy, img_size = img_size):
     max_loc_list = []
     # Loop through each contour
