@@ -115,7 +115,7 @@ def add_border(image, border_size=border_size):
 
 area_limit = 500  # Don't label feature that is too small
 width_limit = 10  # Don't label feature that is too thin
-def contour_family_label(contours, hierarchy, img_size = img_size):
+def find_label_locations(contours, hierarchy, img_size = img_size):
     max_loc_list = []
     # Loop through each contour
     for i, contour in enumerate(contours):
@@ -149,7 +149,7 @@ def contour_family_label(contours, hierarchy, img_size = img_size):
 label_locations_dict = {}
 # Loop through all contours
 for i, contours in cntr_dict.items():
-    label_locations_dict[i] = contour_family_label(contours, hierarchy_dict[i])
+    label_locations_dict[i] = find_label_locations(contours, hierarchy_dict[i])
 
 # Loop through max_loc positions and mark them
 for i, label_location_list in enumerate(label_locations_dict.items()):
