@@ -10,9 +10,6 @@ import imutils
 # img = cv.imread("./color_circles.jpg")
 img = cv.imread("./brad_pitt.jpg")
 
-# Threshold the image to binary using Otsu's method
-_, binary = cv.threshold(img, 0, 255, cv.THRESH_BINARY_INV)
-
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
