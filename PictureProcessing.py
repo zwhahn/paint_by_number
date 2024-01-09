@@ -144,11 +144,6 @@ def contour_family_label(contours, hierarchy, img_size = img_size):
 
     return max_loc_list
 
-def get_levels():
-    # If no parent then it is Level 0
-    if hierarchy[0][j][3] == -1:
-        return 0
-
 label_locations_dict = {}
 # Loop through all contours
 for i, contours in cntr_dict.items():
