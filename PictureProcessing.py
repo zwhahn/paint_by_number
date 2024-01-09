@@ -58,15 +58,6 @@ for count, mask in enumerate(mask_dict):
     mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
 
 
-# '''EDGE DETECTION'''
-# # Detect image edges
-# edges = cv.Canny(mask_img_dict[0], 100, 200) 
-
-# # Overlay edges on original image
-# edges_bgr = cv.cvtColor(edges, cv.COLOR_GRAY2BGR)  # convert edges to bgr
-# overlay_img = img_simplified + edges_bgr
-
-
 '''CONTOURS'''
 def contour_func(input_img):
     input_img_copy = input_img.copy()
