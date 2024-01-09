@@ -157,7 +157,7 @@ for i, contours in cntr_dict.items():
 # Loop through max_loc positions and mark them
 for i, label_location_list in enumerate(label_locations_dict.items()):
     for label_location in label_location_list[1]:
-        # If black don't mark
+        # If area is not filled with color don't mark
         b_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 0]
         g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
         r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
