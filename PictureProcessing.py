@@ -164,6 +164,7 @@ for i, label_location_list in enumerate(label_locations_dict.items()):
         if b_color + g_color + r_color != 0:
             cv.circle(mask_img_cntr_dict[i], label_location, 7, (0, 0, 255), -1)
 
+
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
 fig = plt.figure(figsize=(10,7))
