@@ -87,10 +87,7 @@ def contour_func(input_img):
     for count, contour in enumerate(contours):
         # Compute the center
         M = cv.moments(contour)
-        if int(M["m00"]) > area_limit:  # only if area is large enough
-            center_x = int(M["m10"] / M["m00"])
-            center_y = int(M["m01"] / M["m00"])
-        
+        if int(M["m00"]) > 0:  # only if there is an area     
             cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 1)
     return hierarchy, contours, input_img_copy
 
