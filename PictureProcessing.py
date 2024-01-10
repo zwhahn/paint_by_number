@@ -159,6 +159,7 @@ for i, threshold_img in threshold_img_dict.items():
         dist_transform = cv.distanceTransform((label_ids == j).astype("uint8") * 255, cv.DIST_L2, 3)
         _,max_val,_,_ = cv.minMaxLoc(dist_transform)
         if area > area_limit and max_val > width_limit:
+            # cv.circle(final_mask_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
             component_mask = (label_ids == j).astype("uint8") * 255  # draw them in white
             final_mask = cv.bitwise_or(final_mask, component_mask)
     final_mask_dict[i] = final_mask
@@ -168,8 +169,11 @@ def blend_mask_and_contours(mask, contour_image):
     blended = cv.addWeighted(three_channel_thresh_image, 1, contour_image, 1, 0)
     return blended
 
+blended_img_dict = {}
+for i, contour_image in mask_img_cntr_dict.items():
+    blended_img_dict[i] = blend_mask_and_contours(final_mask_dict[i], mask_img_cntr_dict[i])
+
 # Loop through max_loc positions and mark them
-channel_img = cv.cvtColor(final_mask_dict[0], cv.COLOR_GRAY2BGR)
 for i, label_location_list in enumerate(label_locations_dict.items()):
     for label_location in label_location_list[1]:
         # If area is not filled with color don't mark
@@ -177,11 +181,9 @@ for i, label_location_list in enumerate(label_locations_dict.items()):
         g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
         r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
         if b_color != 0 or g_color != 0 or r_color != 0:
-            cv.circle(final_mask_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
+            cv.circle(blended_img_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
 
-blended_img_dict = {}
-for i, contour_image in enumerate(mask_img_cntr_dict):
-    blended_img_dict[i] = blend_mask_and_contours(final_mask_dict[i], mask_img_cntr_dict[i])
+
 
 for i, contour_list in cntr_dict.items():
     for j, contour in enumerate(contour_list):
