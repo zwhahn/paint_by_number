@@ -145,8 +145,6 @@ label_locations_dict = {}
 for i, contours in cntr_dict.items():
     label_locations_dict[i] = find_label_locations(contours, hierarchy_dict[i])
 
-print("Goal dtype:", threshold_img_dict[0].dtype)
-
 final_mask_dict = {}
 # Connected Components
 for i, threshold_img in threshold_img_dict.items():
@@ -173,6 +171,7 @@ for i, label_location_list in enumerate(label_locations_dict.items()):
         r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
         if b_color != 0 or g_color != 0 or r_color != 0:
             cv.circle(final_mask_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 255), -1)
+
 
 channel_img = cv.cvtColor(final_mask_dict[0], cv.COLOR_GRAY2BGR)
 blended = cv.addWeighted(channel_img, 1, mask_img_cntr_dict[0], 1, 0)
