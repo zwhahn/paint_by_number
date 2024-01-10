@@ -75,7 +75,7 @@ def contour_func(input_img):
         # Compute the center
         M = cv.moments(contour)
         if int(M["m00"]) > 0:  # only if there is an area     
-            cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 1)
+            cv.drawContours(input_img_copy, [contour], -1, (0, 0, 0), 1)
     return img_thresh, hierarchy, contours, input_img_copy
 
 
@@ -156,13 +156,20 @@ for i, threshold_img in threshold_img_dict.items():
     # Go through all 'blobs', if they are larger than the area limit draw them
     for j in range(1,total_labels):
         area = stats[j, cv.CC_STAT_AREA]
-
-        if area > area_limit:
+        dist_transform = cv.distanceTransform((label_ids == j).astype("uint8") * 255, cv.DIST_L2, 3)
+        _,max_val,_,_ = cv.minMaxLoc(dist_transform)
+        if area > area_limit and max_val > width_limit:
             component_mask = (label_ids == j).astype("uint8") * 255  # draw them in white
             final_mask = cv.bitwise_or(final_mask, component_mask)
     final_mask_dict[i] = final_mask
 
+def blend_mask_and_contours(mask, contour_image):
+    three_channel_thresh_image = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
+    blended = cv.addWeighted(three_channel_thresh_image, 1, contour_image, 1, 0)
+    return blended
+
 # Loop through max_loc positions and mark them
+channel_img = cv.cvtColor(final_mask_dict[0], cv.COLOR_GRAY2BGR)
 for i, label_location_list in enumerate(label_locations_dict.items()):
     for label_location in label_location_list[1]:
         # If area is not filled with color don't mark
@@ -170,15 +177,27 @@ for i, label_location_list in enumerate(label_locations_dict.items()):
         g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
         r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
         if b_color != 0 or g_color != 0 or r_color != 0:
-            cv.circle(final_mask_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 255), -1)
+            cv.circle(final_mask_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
+
+blended_img_dict = {}
+for i, contour_image in enumerate(mask_img_cntr_dict):
+    blended_img_dict[i] = blend_mask_and_contours(final_mask_dict[i], mask_img_cntr_dict[i])
 
 
-channel_img = cv.cvtColor(final_mask_dict[0], cv.COLOR_GRAY2BGR)
-blended = cv.addWeighted(channel_img, 1, mask_img_cntr_dict[0], 1, 0)
+'''COMBINE ALL IMAGES'''
+def combine_all(previous_image, current_image):
+    final_image = cv.addWeighted(previous_image, 1, current_image, 1, 0)
+    return final_image
 
-cv.imshow("threshold", blended)
-cv.waitKey(0)
+for i, blended_image in blended_img_dict.items():
+    if i == 0:
+        final_image = blended_image
+    else:
+        previous_image = final_image
+        current_image = blended_image
+        final_image = combine_all(previous_image, current_image)
 
+cv.imshow("Final Image", final_image)
 
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
