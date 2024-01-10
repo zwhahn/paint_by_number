@@ -91,7 +91,23 @@ for count, mask_img in enumerate(mask_img_dict):
     threshold_img_dict[count] = img_thresh
 
 
-cv.imshow("threshold", threshold_img_dict[0])
+'''CONNECTED COMPONENTS'''
+analysis = cv.connectedComponentsWithStats(threshold_img_dict[0], 4, cv.CV_32S)
+(total_labels, label_ids, stats, centroid) = analysis
+
+output = np.zeros(threshold_img_dict[0].shape, dtype="uint8")
+
+for i in range(1,total_labels):
+    area = stats[i, cv.CC_STAT_AREA]
+    print("Area:", area)
+
+    if area > 500:
+        print("Big Area")
+        component_mask = (label_ids == i).astype("uint8") * 255
+
+        output = cv.bitwise_or(output, component_mask)
+
+cv.imshow("threshold", output)
 cv.waitKey(0)
 
 
