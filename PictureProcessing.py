@@ -3,6 +3,9 @@ import numpy as np
 from matplotlib import pyplot as plt 
 import imutils
 
+# Global Constants
+font = cv.FONT_HERSHEY_COMPLEX
+
 # Load original image
 # img = cv.imread("./pa_logo.png")
 # img = cv.imread("./golden_gate_bridge.jpg")
@@ -181,7 +184,9 @@ for i, label_location_list in enumerate(label_locations_dict.items()):
         g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
         r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
         if b_color != 0 or g_color != 0 or r_color != 0:
-            cv.circle(blended_img_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
+            label_location = (label_location[0]-(border_size-5), label_location[1]-(border_size-5))
+            cv.putText(blended_img_dict[i], str(i), label_location, font, 1, (0,0,0), 3)
+            # cv.circle(blended_img_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
 
 
 
@@ -248,7 +253,7 @@ plt.title("Mask 1 w/ Contour")
 # cv.imshow("Mask Image 1", mask_img_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
-cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[5])
+# cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[5])
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
 
