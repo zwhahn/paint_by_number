@@ -91,26 +91,6 @@ for count, mask_img in enumerate(mask_img_dict):
     threshold_img_dict[count] = img_thresh
 
 
-'''CONNECTED COMPONENTS'''
-analysis = cv.connectedComponentsWithStats(threshold_img_dict[0], 4, cv.CV_32S)
-(total_labels, label_ids, stats, centroid) = analysis
-
-output = np.zeros(threshold_img_dict[0].shape, dtype="uint8")
-
-for i in range(1,total_labels):
-    area = stats[i, cv.CC_STAT_AREA]
-    print("Area:", area)
-
-    if area > 500:
-        print("Big Area")
-        component_mask = (label_ids == i).astype("uint8") * 255
-
-        output = cv.bitwise_or(output, component_mask)
-
-cv.imshow("threshold", output)
-cv.waitKey(0)
-
-
 '''LABELING'''
 img_copy = mask_img_cntr_dict[0].copy()
 img_size = img.shape[:2]  # only need the columns and rows
@@ -165,6 +145,28 @@ label_locations_dict = {}
 for i, contours in cntr_dict.items():
     label_locations_dict[i] = find_label_locations(contours, hierarchy_dict[i])
 
+
+# Connected Components
+analysis = cv.connectedComponentsWithStats(threshold_img_dict[0], 4, cv.CV_32S)
+(total_labels, label_ids, stats, centroid) = analysis
+
+output = np.zeros(threshold_img_dict[0].shape, dtype="uint8")
+
+for i in range(1,total_labels):
+    area = stats[i, cv.CC_STAT_AREA]
+    print("Area:", area)
+
+    if area > 500:
+        print("Big Area")
+        component_mask = (label_ids == i).astype("uint8") * 255
+
+        output = cv.bitwise_or(output, component_mask)
+
+cv.imshow("threshold", output)
+cv.waitKey(0)
+
+
+
 # Loop through max_loc positions and mark them
 for i, label_location_list in enumerate(label_locations_dict.items()):
     for label_location in label_location_list[1]:
@@ -174,6 +176,8 @@ for i, label_location_list in enumerate(label_locations_dict.items()):
         r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
         if b_color != 0 or g_color != 0 or r_color != 0:
             cv.circle(mask_img_cntr_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 255), -1)
+
+
 
 
 '''MULTI DISPLAY'''
