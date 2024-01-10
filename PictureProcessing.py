@@ -63,7 +63,7 @@ def contour_func(input_img):
     input_img_copy = input_img.copy()
     # Following method from pyimagesearch.com (https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/)
     img_gray = cv.cvtColor(input_img_copy, cv.COLOR_BGR2GRAY)  # convert to grayscale
-    img_thresh = cv.threshold(img_gray, 60, 255, cv.THRESH_BINARY)[1] 
+    img_thresh = cv.threshold(img_gray, 1, 255, cv.THRESH_BINARY )[1] 
 
     # Find contours
     contours, hierarchy = cv.findContours(img_thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -183,11 +183,16 @@ blended_img_dict = {}
 for i, contour_image in enumerate(mask_img_cntr_dict):
     blended_img_dict[i] = blend_mask_and_contours(final_mask_dict[i], mask_img_cntr_dict[i])
 
+for i, contour_list in cntr_dict.items():
+    for j, contour in enumerate(contour_list):
+        blended_img_dict[i] = cv.drawContours(blended_img_dict[i], [contour], -1, (0,0,0), 1)
+
 
 '''COMBINE ALL IMAGES'''
 def combine_all(previous_image, current_image):
     final_image = cv.addWeighted(previous_image, 1, current_image, 1, 0)
     return final_image
+
 
 for i, blended_image in blended_img_dict.items():
     if i == 0:
@@ -197,7 +202,6 @@ for i, blended_image in blended_img_dict.items():
         current_image = blended_image
         final_image = combine_all(previous_image, current_image)
 
-cv.imshow("Final Image", final_image)
 
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
@@ -242,9 +246,9 @@ plt.title("Mask 1 w/ Contour")
 # cv.imshow("Mask Image 1", mask_img_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
-cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[0])
+cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[5])
 # cv.imshow("Mask Image 2", mask_img_dict[1])
 # cv.imshow("Mask Image 3", mask_img_dict[2])
 
-
+cv.imshow("Final Image", final_image)
 cv.waitKey(0)  # keep images open until any key is pressed
