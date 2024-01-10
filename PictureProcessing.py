@@ -174,7 +174,10 @@ for i, label_location_list in enumerate(label_locations_dict.items()):
         if b_color != 0 or g_color != 0 or r_color != 0:
             cv.circle(final_mask_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 255), -1)
 
-cv.imshow("threshold", final_mask_dict[0])
+channel_img = cv.cvtColor(final_mask_dict[0], cv.COLOR_GRAY2BGR)
+blended = cv.addWeighted(channel_img, 1, mask_img_cntr_dict[0], 1, 0)
+
+cv.imshow("threshold", blended)
 cv.waitKey(0)
 
 
