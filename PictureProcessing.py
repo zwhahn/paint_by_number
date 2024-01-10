@@ -76,16 +76,23 @@ def contour_func(input_img):
         M = cv.moments(contour)
         if int(M["m00"]) > 0:  # only if there is an area     
             cv.drawContours(input_img_copy, [contour], -1, (0, 255, 0), 1)
-    return hierarchy, contours, input_img_copy
+    return img_thresh, hierarchy, contours, input_img_copy
 
+
+threshold_img_dict = {}
 mask_img_cntr_dict = {}
 hierarchy_dict = {}
 cntr_dict = {}  # dict with a list of numpy arrays, each array represents a contour
 for count, mask_img in enumerate(mask_img_dict):
-    hierarchy, contours, output_img = contour_func(mask_img_dict[mask_img])
+    img_thresh, hierarchy, contours, output_img = contour_func(mask_img_dict[mask_img])
     mask_img_cntr_dict[count] = output_img
     cntr_dict[count] = contours
     hierarchy_dict[count] = hierarchy
+    threshold_img_dict[count] = img_thresh
+
+
+cv.imshow("threshold", threshold_img_dict[0])
+cv.waitKey(0)
 
 
 '''LABELING'''
