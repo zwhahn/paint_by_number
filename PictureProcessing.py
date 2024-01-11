@@ -5,6 +5,7 @@ import imutils
 
 # Global Constants
 font = cv.FONT_HERSHEY_COMPLEX
+fontScale = 0.6
 
 # Load original image
 # img = cv.imread("./pa_logo.png")
@@ -177,15 +178,15 @@ for i, contour_image in mask_img_cntr_dict.items():
     blended_img_dict[i] = blend_mask_and_contours(final_mask_dict[i], mask_img_cntr_dict[i])
 
 # Loop through max_loc positions and mark them
-for i, label_location_list in enumerate(label_locations_dict.items()):
-    for label_location in label_location_list[1]:
-        # If area is not filled with color don't mark
-        b_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 0]
-        g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
-        r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
-        if b_color != 0 or g_color != 0 or r_color != 0:
-            label_location = (label_location[0]-(border_size-5), label_location[1]-(border_size-5))
-            cv.putText(blended_img_dict[i], str(i), label_location, font, 1, (0,0,0), 3)
+# for i, label_location_list in enumerate(label_locations_dict.items()):
+#     for label_location in label_location_list[1]:
+#         # If area is not filled with color don't mark
+#         b_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 0]
+#         g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
+#         r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
+#         if b_color != 0 or g_color != 0 or r_color != 0:
+#             label_location = (label_location[0]-(border_size-5), label_location[1]-(border_size-5))
+#             cv.putText(blended_img_dict[i], str(i), label_location, font, 1, (0,0,0), 3)
             # cv.circle(blended_img_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
 
 
@@ -209,6 +210,21 @@ for i, blended_image in blended_img_dict.items():
         current_image = blended_image
         final_image = combine_all(previous_image, current_image)
 
+# Loop through max_loc positions and mark them
+for i, label_location_list in enumerate(label_locations_dict.items()):
+    for label_location in label_location_list[1]:
+        # If area is not filled with color don't mark
+        b_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 0]
+        g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
+        r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
+        if b_color != 0 or g_color != 0 or r_color != 0:
+            text_size = cv.getTextSize(str(i), font, 1, 1)
+            text_width = text_size[0][0]
+            text_height = text_size[0][1]
+            label_location_circ = (int(label_location[0] - (border_size)), int(label_location[1]- (border_size)))
+            label_location = (int(label_location[0]- (border_size + (text_width/2))), int(label_location[1]- (border_size - (text_height/2))))
+            cv.putText(final_image, str(i), label_location, font, fontScale, (0,0,0), 1)
+            # cv.circle(final_image, label_location_circ, 7, (0,0,255), -1)  # Highlight label location (uncomment to check placement)
 
 '''MULTI DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
