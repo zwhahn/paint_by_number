@@ -58,47 +58,39 @@ for count, color_limit in bgr_color_limit_dict.items():
     mask_dict[count] = cv.inRange(img_simplified, bgr_color_limit_dict[count][0], bgr_color_limit_dict[count][1]) 
 
 # Apply masks
-mask_img_dict = {}
+img_mask_dict = {}
 for count, mask in mask_dict.items():
     # Keeps the pixel values from img_simplified where the mask is white
-    mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
+    img_mask_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
 
 
 '''CONTOURS'''
-def contour_func(input_img):
-    input_img_copy = input_img.copy()
+def find_contours(img_mask, img_thresh):
+    img_mask_and_cntr = img_mask.copy()  # Copy image to not override original
     # Following method from pyimagesearch.com (https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/)
-    img_gray = cv.cvtColor(input_img_copy, cv.COLOR_BGR2GRAY)  # convert to grayscale
-    img_thresh = cv.threshold(img_gray, 1, 255, cv.THRESH_BINARY )[1] 
-
-    # Find contours
     contours, hierarchy = cv.findContours(img_thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    # print("hierarchy test: ", hierarchy[0])
     contours = imutils.grab_contours([contours, hierarchy])  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
 
-    # Process and draw contours
-    for count, contour in enumerate(contours):
+    # Find and Draw contours
+    for contour in contours:
         # Compute the center
         M = cv.moments(contour)
         if int(M["m00"]) > 0:  # only if there is an area     
-            cv.drawContours(input_img_copy, [contour], -1, (0, 0, 0), 1)
-    return img_thresh, hierarchy, contours, input_img_copy
+            cv.drawContours(img_mask_and_cntr, [contour], -1, (0, 0, 0), 1)
+    return hierarchy, contours, img_mask_and_cntr
 
-
-threshold_img_dict = {}
-mask_img_cntr_dict = {}
-hierarchy_dict = {}
-cntr_dict = {}  # dict with a list of numpy arrays, each array represents a contour
-for count, mask_img in enumerate(mask_img_dict):
-    img_thresh, hierarchy, contours, output_img = contour_func(mask_img_dict[mask_img])
-    mask_img_cntr_dict[count] = output_img
+img_mask_and_cntr_dict = {}  # Image with mask applied and contours drawn
+hierarchy_dict = {}  # Contour hierarchy information
+cntr_dict = {}  # Values are lists of numpy arrays, each array represents a contour
+for count, img_mask in img_mask_dict.items():
+    hierarchy, contours, img_mask_and_cntr = find_contours(img_mask, mask_dict[count])
+    img_mask_and_cntr_dict[count] = img_mask_and_cntr
     cntr_dict[count] = contours
     hierarchy_dict[count] = hierarchy
-    threshold_img_dict[count] = img_thresh
 
 
 '''LABELING'''
-img_copy = mask_img_cntr_dict[0].copy()
+img_copy = img_mask_and_cntr_dict[0].copy()
 img_size = img.shape[:2]  # only need the columns and rows
 
 # Add border to ensure distanceTransform recognizes edge of photo
@@ -153,7 +145,7 @@ for i, contours in cntr_dict.items():
 
 final_mask_dict = {}
 # Connected Components
-for i, threshold_img in threshold_img_dict.items():
+for i, threshold_img in mask_dict.items():
     # Find all 'blobs' in threshold image
     (total_labels, label_ids, stats, centroid) = cv.connectedComponentsWithStats(threshold_img, 4, cv.CV_32S)
     # Initialize empty mask
@@ -176,16 +168,16 @@ def blend_mask_and_contours(mask, contour_image):
     return blended
 
 blended_img_dict = {}
-for i, contour_image in mask_img_cntr_dict.items():
-    blended_img_dict[i] = blend_mask_and_contours(final_mask_dict[i], mask_img_cntr_dict[i])
+for i, contour_image in img_mask_and_cntr_dict.items():
+    blended_img_dict[i] = blend_mask_and_contours(final_mask_dict[i], img_mask_and_cntr_dict[i])
 
 # Loop through max_loc positions and mark them
 # for i, label_location_list in enumerate(label_locations_dict.items()):
 #     for label_location in label_location_list[1]:
 #         # If area is not filled with color don't mark
-#         b_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 0]
-#         g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
-#         r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
+#         b_color = img_mask_and_cntr_dict[i][label_location[1], label_location[0], 0]
+#         g_color = img_mask_and_cntr_dict[i][label_location[1], label_location[0], 1]
+#         r_color = img_mask_and_cntr_dict[i][label_location[1], label_location[0], 2]
 #         if b_color != 0 or g_color != 0 or r_color != 0:
 #             label_location = (label_location[0]-(border_size-5), label_location[1]-(border_size-5))
 #             cv.putText(blended_img_dict[i], str(i), label_location, font, 1, (0,0,0), 3)
@@ -216,9 +208,9 @@ for i, blended_image in blended_img_dict.items():
 for i, label_location_list in enumerate(label_locations_dict.items()):
     for label_location in label_location_list[1]:
         # If area is not filled with color don't mark
-        b_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 0]
-        g_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 1]
-        r_color = mask_img_cntr_dict[i][label_location[1], label_location[0], 2]
+        b_color = img_mask_and_cntr_dict[i][label_location[1], label_location[0], 0]
+        g_color = img_mask_and_cntr_dict[i][label_location[1], label_location[0], 1]
+        r_color = img_mask_and_cntr_dict[i][label_location[1], label_location[0], 2]
         if b_color != 0 or g_color != 0 or r_color != 0:
             text_size = cv.getTextSize(str(i), font, 1, 1)
             text_width = text_size[0][0]
@@ -249,13 +241,13 @@ plt.title("Simplified Image")
 
 # Add subplot in third position
 fig.add_subplot(rows, columns, 3)
-plt.imshow(cv.cvtColor(mask_img_dict[0], cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_mask_dict[0], cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Mask 1")
 
 # Add subplot in fourth position
 fig.add_subplot(rows, columns, 4)
-plt.imshow(cv.cvtColor(mask_img_cntr_dict[0], cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_mask_and_cntr_dict[0], cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Mask 1 w/ Contour")
 
@@ -268,12 +260,12 @@ plt.title("Mask 1 w/ Contour")
 # cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
-# cv.imshow("Mask Image 1", mask_img_dict[0])
+# cv.imshow("Mask Image 1", img_mask_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
-# cv.imshow("Mask Image 1 w/ Contour", mask_img_cntr_dict[5])
-# cv.imshow("Mask Image 2", mask_img_dict[1])
-# cv.imshow("Mask Image 3", mask_img_dict[2])
+# cv.imshow("Mask Image 1 w/ Contour", img_mask_and_cntr_dict[5])
+# cv.imshow("Mask Image 2", img_mask_dict[1])
+# cv.imshow("Mask Image 3", img_mask_dict[2])
 
 cv.imshow("Final Image", final_image)
 cv.waitKey(0)  # keep images open until any key is pressed
