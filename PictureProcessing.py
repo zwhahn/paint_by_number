@@ -45,23 +45,23 @@ img_simplified = img_simplified.reshape((img.shape))
 # For each base_color, calculate max and min values to use as mask 
 tol = 5  # tolerance 
 bgr_color_limit_dict = {}
-for count, bgr_color in enumerate(base_colors):
-    b_val = base_colors[count][0]
-    g_val = base_colors[count][1]
-    r_val = base_colors[count][2]
-    bgr_color_limit_dict[count] = np.array([b_val - tol, g_val - tol, r_val - tol]), np.array([b_val + tol, g_val + tol, r_val + tol])
+for i, bgr_color in enumerate(base_colors):
+    b_val = base_colors[i][0]
+    g_val = base_colors[i][1]
+    r_val = base_colors[i][2]
+    bgr_color_limit_dict[i] = np.array([b_val - tol, g_val - tol, r_val - tol]), np.array([b_val + tol, g_val + tol, r_val + tol])
 
 # Create masks
 mask_dict = {}
-for count, color_limit in bgr_color_limit_dict.items():
+for i, color_limit in bgr_color_limit_dict.items():
     # Each pixel that falls in the color range is set to white (255), the rest are set to black (0)
-    mask_dict[count] = cv.inRange(img_simplified, bgr_color_limit_dict[count][0], bgr_color_limit_dict[count][1]) 
+    mask_dict[i] = cv.inRange(img_simplified, bgr_color_limit_dict[i][0], bgr_color_limit_dict[i][1]) 
 
 # Apply masks
 img_mask_dict = {}
-for count, mask in mask_dict.items():
+for i, mask in mask_dict.items():
     # Keeps the pixel values from img_simplified where the mask is white
-    img_mask_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
+    img_mask_dict[i] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[i])
 
 
 '''CONTOURS'''
@@ -82,28 +82,27 @@ def find_contours(img_mask, img_thresh):
 img_mask_and_cntr_dict = {}  # Image with mask applied and contours drawn
 hierarchy_dict = {}  # Contour hierarchy information
 cntr_dict = {}  # Values are lists of numpy arrays, each array represents a contour
-for count, img_mask in img_mask_dict.items():
-    hierarchy, contours, img_mask_and_cntr = find_contours(img_mask, mask_dict[count])
-    img_mask_and_cntr_dict[count] = img_mask_and_cntr
-    cntr_dict[count] = contours
-    hierarchy_dict[count] = hierarchy
+for i, img_mask in img_mask_dict.items():
+    hierarchy, contours, img_mask_and_cntr = find_contours(img_mask, mask_dict[i])
+    img_mask_and_cntr_dict[i] = img_mask_and_cntr
+    cntr_dict[i] = contours
+    hierarchy_dict[i] = hierarchy
 
 
 '''LABELING'''
-img_copy = img_mask_and_cntr_dict[0].copy()
 img_size = img.shape[:2]  # only need the columns and rows
 
 # Add border to ensure distanceTransform recognizes edge of photo
 border_size = 1
-def add_border(image, border_size=border_size):
-    border_img = cv.copyMakeBorder(image, 
+def add_border(img, border_size=border_size):
+    img_border = cv.copyMakeBorder(img, 
                                    top= border_size,
                                    bottom= border_size,
                                    left= border_size,
                                    right= border_size,
                                    borderType= cv.BORDER_CONSTANT,
                                    value= [0, 0, 0])
-    return border_img
+    return img_border
 
 area_limit = 500  # Don't label feature that is too small
 width_limit = 10  # Don't label feature that is too thin
