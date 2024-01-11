@@ -2,7 +2,10 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt 
 import imutils
-from datetime import datetime as dt
+import time
+
+# Timer Start
+start_time = time.time()
 
 # Global Constants
 font = cv.FONT_HERSHEY_COMPLEX
@@ -256,6 +259,11 @@ plt.title("Mask 1 w/ Contour")
 # cv.imshow("Mask Image 1 w/ Contour", img_mask_and_cntr_dict[5])
 # cv.imshow("Mask Image 2", img_mask_dict[1])
 # cv.imshow("Mask Image 3", img_mask_dict[2])
+
+# Timer End
+end_time = time.time()
+total_time = (end_time-start_time)
+print(f'Run Time: {total_time:.4f} seconds')
 
 cv.imshow("Final Image", final_image)
 cv.waitKey(0)  # keep images open until any key is pressed
