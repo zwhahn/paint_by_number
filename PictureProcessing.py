@@ -75,7 +75,8 @@ def find_contours(img_mask, img_thresh):
     for contour in contours:
         # Compute the center
         M = cv.moments(contour)
-        if int(M["m00"]) > 0:  # only if there is an area     
+        area = int(M["m00"])
+        if area > 0:  # only if there is an area     
             cv.drawContours(img_mask_and_cntr, [contour], -1, (0, 0, 0), 1)
     return hierarchy, contours, img_mask_and_cntr
 
@@ -108,37 +109,36 @@ area_limit = 500  # Don't label feature that is too small
 width_limit = 10  # Don't label feature that is too thin
 def find_label_locations(contours, hierarchy, img_size = img_size):
     max_loc_list = []
-    # Loop through each contour
     for i, contour in enumerate(contours):
         M = cv.moments(contour)  # calculate shape attributes  
         area = int(M["m00"])
-        if area > area_limit:  # check if contour has no parent and area is big enough
-            mask = np.zeros((img_size[0], img_size[1], 3), dtype=np.uint8)  # initialize mask (blank image)
-            cv.drawContours(mask, [contour], -1, (0,255,0), cv.FILLED)  # draw larger, filled contour
+        if area > area_limit:  # check area is big enough
+            temp = np.zeros((img_size[0], img_size[1], 3), dtype=np.uint8)  # initialize mask (blank image)
+            cv.drawContours(temp, [contour], -1, (0,255,0), cv.FILLED)  # draw larger, filled contour
             
             # Exclude holes by drawing child contours in black
             for j, child_contour in enumerate(contours): # loop through contours again
                 if hierarchy[0][j][3] == i:  # if parent is current contour then draw it in black
-                    cv.drawContours(mask, [child_contour], -1, (0), thickness=cv.FILLED)
+                    cv.drawContours(temp, [child_contour], -1, (0), thickness=cv.FILLED)
             
             # Add border
-            img_border = add_border(mask)
+            temp_border = add_border(temp)
 
             # Convery image to correct format for distanceTransform
-            gray = cv.cvtColor(img_border, cv.COLOR_BGR2GRAY)
-            out = cv.convertScaleAbs(gray)
-            # cv.imshow("mask", out)
-            # cv.waitKey(0)
+            gray = cv.cvtColor(temp_border, cv.COLOR_BGR2GRAY)
+            bw = cv.convertScaleAbs(gray)
+
+            # Calculate distance from each non-zero pixel to nearest zero pixel
+            dist_transform = cv.distanceTransform(bw, cv.DIST_L2, 3)
+            _,max_val,_, max_loc = cv.minMaxLoc(dist_transform)  # Find pixel with largest distance to any border (most space for labeling)
             
-            dist_transform = cv.distanceTransform(out, cv.DIST_L2, 3)
-            _,max_val,_, max_loc = cv.minMaxLoc(dist_transform)
+            # The contour might have a large enough area but is long and skinny. If there is no area that is large enough for a clear label, skip it
             if max_val > width_limit:
                 max_loc_list.append(max_loc)
 
     return max_loc_list
 
 label_locations_dict = {}
-# Loop through all contours
 for i, contours in cntr_dict.items():
     label_locations_dict[i] = find_label_locations(contours, hierarchy_dict[i])
 
