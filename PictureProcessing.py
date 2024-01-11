@@ -141,11 +141,12 @@ def find_label_locations(contours, hierarchy, img_size = img_size):
 
     return max_loc_list
 
-label_locations_dict = {}
-for i, contours in cntr_dict.items():
-    label_locations_dict[i] = find_label_locations(contours, hierarchy_dict[i])
+# label_locations_dict = {}
+# for i, contours in cntr_dict.items():
+#     label_locations_dict[i] = find_label_locations(contours, hierarchy_dict[i])
 
 def draw_empty_contours(mask):
+    max_loc_list = []
     # Find all 'blobs' in threshold image
     (total_labels, label_ids, stats, centroid) = cv.connectedComponentsWithStats(mask, 4, cv.CV_32S)
     # Initialize empty mask
@@ -154,16 +155,22 @@ def draw_empty_contours(mask):
     for j in range(1,total_labels):
         area = stats[j, cv.CC_STAT_AREA]
         dist_transform = cv.distanceTransform((label_ids == j).astype("uint8") * 255, cv.DIST_L2, 3)
-        _,max_val,_,_ = cv.minMaxLoc(dist_transform)
+        _,max_val,_, max_loc = cv.minMaxLoc(dist_transform)
         if area > area_limit and max_val > width_limit:
             # cv.circle(final_mask_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
             component_mask = (label_ids == j).astype("uint8") * 255  # draw them in white
             empty_contour = cv.bitwise_or(empty_contour, component_mask)
-    return empty_contour
+            if max_val > width_limit:
+                max_loc_list.append(max_loc)
+    return empty_contour, max_loc_list
 
+label_locations_dict = {}
 empty_contours_dict = {}
 for i, mask in mask_dict.items():
-    empty_contours_dict[i] = draw_empty_contours(mask)
+    empty_contour, max_loc_list = draw_empty_contours(mask)
+    empty_contours_dict[i] = empty_contour
+    label_locations_dict[i] = max_loc_list
+
 
 
 def blend_mask_and_contours(mask, contour_image):
