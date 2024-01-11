@@ -153,7 +153,8 @@ def draw_empty_contours(mask):
     empty_contour = np.zeros(mask.shape, dtype="uint8")
     # Go through all 'blobs', if they are larger than the area limit draw them
     for j in range(1,total_labels):
-        area = stats[j, cv.CC_STAT_AREA]
+        x, y, w, h, area = stats[j]
+        # area = stats[j, cv.CC_STAT_AREA]
         dist_transform = cv.distanceTransform((label_ids == j).astype("uint8") * 255, cv.DIST_L2, 3)
         _,max_val,_, max_loc = cv.minMaxLoc(dist_transform)
         if area > area_limit and max_val > width_limit:
