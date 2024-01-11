@@ -20,14 +20,12 @@ img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
-# The value -1 the number of rows needed is calculated 
-# automatically based on the colomns. By reshaping to a 2D array, 
+# The value -1 the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
 # each pixel is a row and each column represents a column (R, G, B).
-# This allows the k-means cluster algorithm to cluster similar colors
-# together.  
+# This allows the k-means cluster algorithm to cluster similar colors together.  
 img_reshape = img_blur.reshape((-1, 3))
 
-# Convert to float32
+# Convert to float32 for floating-point calculations
 img_reshape = np.float32(img_reshape)
 
 # Define criteria, number of clusters(K), and apply kmeans()
@@ -37,28 +35,32 @@ criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop c
 K = 6  # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
-# Convert back to uint8
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
 # print(base_colors)
-img_simplified = base_colors[label.flatten()]
+img_simplified = base_colors[label.flatten()]  # Replace each picel with its corresponding base color
 img_simplified = img_simplified.reshape((img.shape))
 
 
 '''COLOR MASKING'''
-# Compute the upper and lower limits
+# For each base_color, calculate max and min values to use as mask 
 tol = 5  # tolerance 
 bgr_color_limit_dict = {}
 for count, bgr_color in enumerate(base_colors):
-    bgr_color_limit_dict[count] = np.array([base_colors[count][0] - tol, base_colors[count][1] - tol, base_colors[count][2] - tol]), np.array([base_colors[count][0] + tol, base_colors[count][1] + tol, base_colors[count][2] + tol])
+    b_val = base_colors[count][0]
+    g_val = base_colors[count][1]
+    r_val = base_colors[count][2]
+    bgr_color_limit_dict[count] = np.array([b_val - tol, g_val - tol, r_val - tol]), np.array([b_val + tol, g_val + tol, r_val + tol])
 
 # Create masks
 mask_dict = {}
-for count, color_limit in enumerate(bgr_color_limit_dict):
+for count, color_limit in bgr_color_limit_dict.items():
+    # Each pixel that falls in the color range is set to white (255), the rest are set to black (0)
     mask_dict[count] = cv.inRange(img_simplified, bgr_color_limit_dict[count][0], bgr_color_limit_dict[count][1]) 
 
 # Apply masks
 mask_img_dict = {}
-for count, mask in enumerate(mask_dict):
+for count, mask in mask_dict.items():
+    # Keeps the pixel values from img_simplified where the mask is white
     mask_img_dict[count] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[count])
 
 
