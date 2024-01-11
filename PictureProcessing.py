@@ -91,8 +91,6 @@ for i, img_mask in img_mask_dict.items():
 
 
 '''LABELING'''
-img_size = img.shape[:2]  # only need the columns and rows
-
 # Add border to ensure distanceTransform recognizes edge of photo
 border_size = 1
 def add_border(img, border_size=border_size):
@@ -105,6 +103,7 @@ def add_border(img, border_size=border_size):
                                    value= [0, 0, 0])
     return img_border
 
+img_size = img.shape[:2]  # Columns and rows
 area_limit = 500  # Don't label feature that is too small
 width_limit = 10  # Don't label feature that is too thin
 def find_label_locations(contours, hierarchy, img_size = img_size):
@@ -142,14 +141,12 @@ label_locations_dict = {}
 for i, contours in cntr_dict.items():
     label_locations_dict[i] = find_label_locations(contours, hierarchy_dict[i])
 
-final_mask_dict = {}
-# Connected Components
-for i, threshold_img in mask_dict.items():
-    # Find all 'blobs' in threshold image
-    (total_labels, label_ids, stats, centroid) = cv.connectedComponentsWithStats(threshold_img, 4, cv.CV_32S)
-    # Initialize empty mask
-    final_mask = np.zeros(threshold_img.shape, dtype="uint8")
 
+def draw_empty_contours(mask):
+    # Find all 'blobs' in threshold image
+    (total_labels, label_ids, stats, centroid) = cv.connectedComponentsWithStats(mask, 4, cv.CV_32S)
+    # Initialize empty mask
+    final_mask = np.zeros(mask.shape, dtype="uint8")
     # Go through all 'blobs', if they are larger than the area limit draw them
     for j in range(1,total_labels):
         area = stats[j, cv.CC_STAT_AREA]
@@ -159,7 +156,13 @@ for i, threshold_img in mask_dict.items():
             # cv.circle(final_mask_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
             component_mask = (label_ids == j).astype("uint8") * 255  # draw them in white
             final_mask = cv.bitwise_or(final_mask, component_mask)
-    final_mask_dict[i] = final_mask
+    return final_mask
+
+
+final_mask_dict = {}
+for i, mask in mask_dict.items():
+    # Find all 'blobs' in threshold image
+    final_mask_dict[i] = draw_empty_contours(mask)
 
 def blend_mask_and_contours(mask, contour_image):
     three_channel_thresh_image = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
