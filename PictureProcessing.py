@@ -199,7 +199,7 @@ for color_number, label_location_list in label_locations_dict.items():
             label_location_circ = (int(x_pos - (border_size)), int(y_pos- (border_size)))
             label_location = (int(x_pos- (border_size + (text_width/2))), int(y_pos- (border_size - (text_height/2))))
             cv.putText(final_image, str(color_number), label_location, font, fontScale, (0,0,0), 1)
-            # cv.circle(final_image, label_location_circ, 7, (0,0,255), -1)  # Highlight label location (uncomment to check placement)
+            # cv.circle(final_image, label_location_circ, 3, (0,0,255), -1)  # Highlight label location (uncomment to check placement)
 
 
 '''DISPLAY'''
