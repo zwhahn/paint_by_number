@@ -68,35 +68,29 @@ for i, mask in mask_dict.items():
     img_mask_dict[i] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[i])
 
 
-'''CONTOURS'''
+'''FIND CONTOURS'''
 def find_contours(img_mask, img_thresh):
-    img_mask_and_cntr = img_mask.copy()  # Copy image to not override original
     # Following method from pyimagesearch.com (https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/)
     contours, hierarchy = cv.findContours(img_thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     contours = imutils.grab_contours([contours, hierarchy])  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
+    return hierarchy, contours
 
-    # Find and Draw contours
-    for contour in contours:
-        # Compute the center
-        M = cv.moments(contour)
-        area = int(M["m00"])
-        if area > 0:  # only if there is an area     
-            cv.drawContours(img_mask_and_cntr, [contour], -1, (0, 0, 0), 1)
-    return hierarchy, contours, img_mask_and_cntr
-
-img_mask_and_cntr_dict = {}  # Image with mask applied and contours drawn
 hierarchy_dict = {}  # Contour hierarchy information
 cntr_dict = {}  # Values are lists of numpy arrays, each array represents a contour
 for i, img_mask in img_mask_dict.items():
-    hierarchy, contours, img_mask_and_cntr = find_contours(img_mask, mask_dict[i])
-    img_mask_and_cntr_dict[i] = img_mask_and_cntr
+    hierarchy, contours = find_contours(img_mask, mask_dict[i])
     cntr_dict[i] = contours
     hierarchy_dict[i] = hierarchy
 
 
 '''LABELING'''
-# Add border to ensure distanceTransform recognizes edge of photo
+# Constants
+img_size = img.shape[:2]  # Columns and rows
+area_limit = 500  # Don't label feature that is too small
+width_limit = 10  # Don't label feature that is too thin
 border_size = 1
+
+# Add border to ensure distanceTransform recognizes edge of photo
 def add_border(img, border_size=border_size):
     img_border = cv.copyMakeBorder(img, 
                                    top= border_size,
@@ -107,49 +101,60 @@ def add_border(img, border_size=border_size):
                                    value= [0, 0, 0])
     return img_border
 
-img_size = img.shape[:2]  # Columns and rows
-area_limit = 500  # Don't label feature that is too small
-width_limit = 10  # Don't label feature that is too thin
-
+# Check if blob is on the edge of the image
 def blob_is_on_image_edge(x_pos, y_pos, width, height, img_size = img_size):
     if x_pos == 0 or y_pos == 0 or (x_pos + width) == img_size[1] or (y_pos + height) == img_size[0]:
         return True
     else:
         return False  
 
-def draw_empty_contours(mask):
-    max_loc_list = []
+
+def find_label_location(blob):
+    # Calculate shortest distance from each white to a black pixel
+    dist_transform = cv.distanceTransform(blob, cv.DIST_L2, 3)
+
+    # Return the largest distance and location of the pixel (most space for a clear number label)
+    _,max_val,_, max_loc = cv.minMaxLoc(dist_transform)
+    return max_val, max_loc
+
+
+def draw_empty_contours_and_labels(mask):
+    label_location_list = []  # Initialize list to store label locations
+
     # Find all 'blobs' in threshold image
-    (total_labels, label_ids, stats, centroid) = cv.connectedComponentsWithStats(mask, 4, cv.CV_32S)
+    (total_labels, label_ids, stats, _) = cv.connectedComponentsWithStats(mask, 4, cv.CV_32S)
+
     # Initialize empty mask
     empty_contour = np.zeros(mask.shape, dtype="uint8")
-    # Go through all 'blobs', if they are larger than the area limit draw them
-    for j in range(1,total_labels):
-        x_pos, y_pos, width, height, area = stats[j]
-        blob = (label_ids == j).astype("uint8") * 255
+
+    for blob_id in range(1,total_labels):
+        x_pos, y_pos, width, height, area = stats[blob_id]
+        blob = (label_ids == blob_id).astype("uint8") * 255  # draw blob in white
 
         # If the blob is on the edge of the image, add a border to distanceTransform will recognize edge
         if blob_is_on_image_edge(x_pos, y_pos, width, height):
-            blob = cv.copyMakeBorder(blob, 1, 1, 1, 1, cv.BORDER_CONSTANT, (0,0,0))
-        dist_transform = cv.distanceTransform(blob, cv.DIST_L2, 3)
-        _,max_val,_, max_loc = cv.minMaxLoc(dist_transform)
+            blob_with_border = add_border(blob)
+            max_val, max_loc = find_label_location(blob_with_border)
+        
+        else:
+            max_val, max_loc = find_label_location(blob)
+
+        # If the blob area and the distance from any wall is large enouig
         if area > area_limit and max_val > width_limit:
-            # cv.circle(final_mask_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
-            component_mask = (label_ids == j).astype("uint8") * 255  # draw them in white
-            empty_contour = cv.bitwise_or(empty_contour, component_mask)
+            empty_contour = cv.bitwise_or(empty_contour, blob)
             if max_val > width_limit:
-                max_loc_list.append(max_loc)
-    return empty_contour, max_loc_list
+                label_location_list.append(max_loc)
+    return empty_contour, label_location_list
 
 label_locations_dict = {}
 empty_contours_dict = {}
 for i, mask in mask_dict.items():
-    empty_contour, max_loc_list = draw_empty_contours(mask)
+    empty_contour, label_location_list = draw_empty_contours_and_labels(mask)
     empty_contours_dict[i] = empty_contour
-    label_locations_dict[i] = max_loc_list
+    label_locations_dict[i] = label_location_list
 
 
-
+'''COMBINING IMAGES'''
 def blend_mask_and_contours(mask, contour_image):
     three_channel_thresh_image = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
     blended = cv.addWeighted(three_channel_thresh_image, 1, contour_image, 1, 0)
@@ -160,11 +165,9 @@ for i, empty_contours in empty_contours_dict.items():
     blended_img_dict[i] = blend_mask_and_contours(empty_contours, img_mask_dict[i])
 
 
-'''COMBINE ALL IMAGES'''
 def combine_all(previous_image, current_image):
     final_image = cv.addWeighted(previous_image, 1, current_image, 1, 0)
     return final_image
-
 
 for i, blended_image in blended_img_dict.items():
     if i == 0:
@@ -173,6 +176,7 @@ for i, blended_image in blended_img_dict.items():
         previous_image = final_image
         current_image = blended_image
         final_image = combine_all(previous_image, current_image)
+
 
 # Draw all contour outlines (for coloring in)
 for i, contour_list in cntr_dict.items():
@@ -197,7 +201,8 @@ for color_number, label_location_list in label_locations_dict.items():
             cv.putText(final_image, str(color_number), label_location, font, fontScale, (0,0,0), 1)
             # cv.circle(final_image, label_location_circ, 7, (0,0,255), -1)  # Highlight label location (uncomment to check placement)
 
-'''MULTI DISPLAY'''
+
+'''DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
 fig = plt.figure(figsize=(10,7))
 
@@ -224,7 +229,7 @@ plt.title("Mask 1")
 
 # Add subplot in fourth position
 fig.add_subplot(rows, columns, 4)
-plt.imshow(cv.cvtColor(img_mask_and_cntr_dict[0], cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_mask_dict[0], cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Mask 1 w/ Contour")
 
@@ -240,7 +245,6 @@ plt.title("Mask 1 w/ Contour")
 # cv.imshow("Mask Image 1", img_mask_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
-# cv.imshow("Mask Image 1 w/ Contour", img_mask_and_cntr_dict[5])
 # cv.imshow("Mask Image 2", img_mask_dict[1])
 # cv.imshow("Mask Image 3", img_mask_dict[2])
 
