@@ -7,10 +7,6 @@ import time
 # Timer Start
 start_time = time.time()
 
-# Global Constants
-font = cv.FONT_HERSHEY_COMPLEX
-fontScale = 0.6
-
 # Load original image
 # img = cv.imread("./pa_logo.png")
 # img = cv.imread("./golden_gate_bridge.jpg")
@@ -36,7 +32,7 @@ img_reshape = np.float32(img_reshape)
 # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
 # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
-K = 6  # number of clusters (or colors)
+K = 16  # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
@@ -183,23 +179,28 @@ for i, contour_list in cntr_dict.items():
     for j, contour in enumerate(contour_list):
         final_image = cv.drawContours(final_image, [contour], -1, (0,0,0), 1)
 
+
 # Label with corresponding numbers
+font = cv.FONT_HERSHEY_COMPLEX
+font_scale = 0.6
+font_thickness = 1
+font_color = (0,0,0)
 for color_number, label_location_list in label_locations_dict.items():
     for label_location in label_location_list:
         # If area is filled with color, don't label
-        y_pos = label_location[1]
-        x_pos = label_location[0]
+        y_pos = int(label_location[1])
+        x_pos = int(label_location[0])
         b_color = img_mask_dict[color_number][y_pos, x_pos, 0]
         g_color = img_mask_dict[color_number][y_pos, x_pos, 1]
         r_color = img_mask_dict[color_number][y_pos, x_pos, 2]
         if b_color != 0 or g_color != 0 or r_color != 0:
-            text_size = cv.getTextSize(str(i), font, 1, 1)
-            text_width = text_size[0][0]
-            text_height = text_size[0][1]
-            label_location_circ = (int(x_pos - (border_size)), int(y_pos- (border_size)))
-            label_location = (int(x_pos- (border_size + (text_width/2))), int(y_pos- (border_size - (text_height/2))))
-            cv.putText(final_image, str(color_number), label_location, font, fontScale, (0,0,0), 1)
-            # cv.circle(final_image, label_location_circ, 3, (0,0,255), -1)  # Highlight label location (uncomment to check placement)
+            text_size = cv.getTextSize(str(color_number + 1), font, font_scale, font_thickness)[0]
+            text_width = text_size[0]
+            text_height = text_size[1]
+            label_location_circ = (x_pos, y_pos)
+            label_location = (int(x_pos - (text_width/2)), int(y_pos + (text_height/2)))
+            cv.putText(final_image, str(color_number + 1), label_location, font, font_scale, font_color, font_thickness)
+            cv.circle(final_image, label_location_circ, 3, (0,0,255), -1)  # Highlight label location (uncomment to check placement)
 
 
 '''DISPLAY'''
