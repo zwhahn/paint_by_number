@@ -110,40 +110,12 @@ def add_border(img, border_size=border_size):
 img_size = img.shape[:2]  # Columns and rows
 area_limit = 500  # Don't label feature that is too small
 width_limit = 10  # Don't label feature that is too thin
-def find_label_locations(contours, hierarchy, img_size = img_size):
-    max_loc_list = []
-    for i, contour in enumerate(contours):
-        M = cv.moments(contour)  # calculate shape attributes  
-        area = int(M["m00"])
-        if area > area_limit:  # check area is big enough
-            temp = np.zeros((img_size[0], img_size[1], 3), dtype=np.uint8)  # initialize mask (blank image)
-            cv.drawContours(temp, [contour], -1, (0,255,0), cv.FILLED)  # draw larger, filled contour
-            
-            # Exclude holes by drawing child contours in black
-            for j, child_contour in enumerate(contours): # loop through contours again
-                if hierarchy[0][j][3] == i:  # if parent is current contour then draw it in black
-                    cv.drawContours(temp, [child_contour], -1, (0), thickness=cv.FILLED)
-            
-            # Add border
-            temp_border = add_border(temp)
 
-            # Convery image to correct format for distanceTransform
-            gray = cv.cvtColor(temp_border, cv.COLOR_BGR2GRAY)
-            bw = cv.convertScaleAbs(gray)
-
-            # Calculate distance from each non-zero pixel to nearest zero pixel
-            dist_transform = cv.distanceTransform(bw, cv.DIST_L2, 3)
-            _,max_val,_, max_loc = cv.minMaxLoc(dist_transform)  # Find pixel with largest distance to any border (most space for labeling)
-            
-            # The contour might have a large enough area but is long and skinny. If there is no area that is large enough for a clear label, skip it
-            if max_val > width_limit:
-                max_loc_list.append(max_loc)
-
-    return max_loc_list
-
-# label_locations_dict = {}
-# for i, contours in cntr_dict.items():
-#     label_locations_dict[i] = find_label_locations(contours, hierarchy_dict[i])
+def blob_is_on_image_edge(x_pos, y_pos, width, height, img_size = img_size):
+    if x_pos == 0 or y_pos == 0 or (x_pos + width) == img_size[1] or (y_pos + height) == img_size[0]:
+        return True
+    else:
+        return False  
 
 def draw_empty_contours(mask):
     max_loc_list = []
@@ -153,9 +125,13 @@ def draw_empty_contours(mask):
     empty_contour = np.zeros(mask.shape, dtype="uint8")
     # Go through all 'blobs', if they are larger than the area limit draw them
     for j in range(1,total_labels):
-        x, y, w, h, area = stats[j]
-        # area = stats[j, cv.CC_STAT_AREA]
-        dist_transform = cv.distanceTransform((label_ids == j).astype("uint8") * 255, cv.DIST_L2, 3)
+        x_pos, y_pos, width, height, area = stats[j]
+        blob = (label_ids == j).astype("uint8") * 255
+
+        # If the blob is on the edge of the image, add a border to distanceTransform will recognize edge
+        if blob_is_on_image_edge(x_pos, y_pos, width, height):
+            blob = cv.copyMakeBorder(blob, 1, 1, 1, 1, cv.BORDER_CONSTANT, (0,0,0))
+        dist_transform = cv.distanceTransform(blob, cv.DIST_L2, 3)
         _,max_val,_, max_loc = cv.minMaxLoc(dist_transform)
         if area > area_limit and max_val > width_limit:
             # cv.circle(final_mask_dict[i], (label_location[0]-border_size, label_location[1]-border_size), 7, (0, 0, 0), -1)
