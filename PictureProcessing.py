@@ -32,7 +32,7 @@ img_reshape = np.float32(img_reshape)
 # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
 # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
-K = 16  # number of clusters (or colors)
+K = 6  # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
@@ -64,7 +64,13 @@ for i, mask in mask_dict.items():
     img_mask_dict[i] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[i])
 
 
-'''FIND CONTOURS'''
+
+'''FIND AND DRAW CONTOURS AND LABELS'''
+img_size = img.shape[:2]  # Columns and rows
+area_limit = 500  # Don't label feature that is too small
+width_limit = 10  # Don't label feature that is too thin
+border_size = 1
+
 def find_contours(img_mask, img_thresh):
     # Following method from pyimagesearch.com (https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/)
     contours, hierarchy = cv.findContours(img_thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -78,13 +84,12 @@ for i, img_mask in img_mask_dict.items():
     cntr_dict[i] = contours
     hierarchy_dict[i] = hierarchy
 
-
-'''LABELING'''
-# Constants
-img_size = img.shape[:2]  # Columns and rows
-area_limit = 500  # Don't label feature that is too small
-width_limit = 10  # Don't label feature that is too thin
-border_size = 1
+# Check if blob is on the edge of the image
+def blob_is_on_image_edge(x_pos, y_pos, width, height, img_size = img_size):
+    if x_pos == 0 or y_pos == 0 or (x_pos + width) == img_size[1] or (y_pos + height) == img_size[0]:
+        return True
+    else:
+        return False  
 
 # Add border to ensure distanceTransform recognizes edge of photo
 def add_border(img, border_size=border_size):
@@ -97,14 +102,6 @@ def add_border(img, border_size=border_size):
                                    value= [0, 0, 0])
     return img_border
 
-# Check if blob is on the edge of the image
-def blob_is_on_image_edge(x_pos, y_pos, width, height, img_size = img_size):
-    if x_pos == 0 or y_pos == 0 or (x_pos + width) == img_size[1] or (y_pos + height) == img_size[0]:
-        return True
-    else:
-        return False  
-
-
 def find_label_location(blob):
     # Calculate shortest distance from each white to a black pixel
     dist_transform = cv.distanceTransform(blob, cv.DIST_L2, 3)
@@ -112,7 +109,6 @@ def find_label_location(blob):
     # Return the largest distance and location of the pixel (most space for a clear number label)
     _,max_val,_, max_loc = cv.minMaxLoc(dist_transform)
     return max_val, max_loc
-
 
 def draw_empty_contours_and_labels(mask):
     label_location_list = []  # Initialize list to store label locations
@@ -173,12 +169,10 @@ for i, blended_image in blended_img_dict.items():
         current_image = blended_image
         final_image = combine_all(previous_image, current_image)
 
-
 # Draw all contour outlines (for coloring in)
 for i, contour_list in cntr_dict.items():
     for j, contour in enumerate(contour_list):
         final_image = cv.drawContours(final_image, [contour], -1, (0,0,0), 1)
-
 
 # Label with corresponding numbers
 font = cv.FONT_HERSHEY_COMPLEX
@@ -194,16 +188,17 @@ for color_number, label_location_list in label_locations_dict.items():
         g_color = img_mask_dict[color_number][y_pos, x_pos, 1]
         r_color = img_mask_dict[color_number][y_pos, x_pos, 2]
         if b_color != 0 or g_color != 0 or r_color != 0:
+            label_location_circ = (x_pos, y_pos)
+            # Center text using method by xcsrz (https://gist.github.com/xcsrz/8938a5d4a47976c745407fe2788c813a)
             text_size = cv.getTextSize(str(color_number + 1), font, font_scale, font_thickness)[0]
             text_width = text_size[0]
             text_height = text_size[1]
-            label_location_circ = (x_pos, y_pos)
             label_location = (int(x_pos - (text_width/2)), int(y_pos + (text_height/2)))
             cv.putText(final_image, str(color_number + 1), label_location, font, font_scale, font_color, font_thickness)
             cv.circle(final_image, label_location_circ, 3, (0,0,255), -1)  # Highlight label location (uncomment to check placement)
 
 
-'''DISPLAY'''
+'''MATPLOTLIB DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
 fig = plt.figure(figsize=(10,7))
 
@@ -237,7 +232,7 @@ plt.title("Mask 1 w/ Contour")
 # plt.show()  # display matplotlib figures 
 
 
-'''IMAGES TO SHOW'''
+'''IMSHOW'''
 # cv.imshow("Original Image", img)
 # cv.imshow("Blurred Image", img_blur)
 # cv.imshow("Simplified Image", img_simplified)
