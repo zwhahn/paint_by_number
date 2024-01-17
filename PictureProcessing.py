@@ -152,16 +152,16 @@ def blend_mask_and_contours(mask, contour_image):
     blended = cv.addWeighted(three_channel_thresh_image, 1, contour_image, 1, 0)
     return blended
 
-blended_img_dict = {}
+img_blended_dict = {}
 for i, empty_contours in empty_contours_dict.items():
-    blended_img_dict[i] = blend_mask_and_contours(empty_contours, img_mask_dict[i])
+    img_blended_dict[i] = blend_mask_and_contours(empty_contours, img_mask_dict[i])
 
 
 def combine_all(previous_image, current_image):
     final_image = cv.addWeighted(previous_image, 1, current_image, 1, 0)
     return final_image
 
-for i, blended_image in blended_img_dict.items():
+for i, blended_image in img_blended_dict.items():
     if i == 0:
         final_image = blended_image
     else:
@@ -237,7 +237,6 @@ cv.imshow("Original Image", img)
 # cv.imshow("Blurred Image", img_blur)
 # cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
-# cv.imshow("Simplified Image overlaid with Edge Detection", overlay_img)
 # cv.imshow("Mask Image 1", img_mask_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
