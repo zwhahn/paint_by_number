@@ -64,7 +64,6 @@ for i, mask in mask_dict.items():
     img_mask_dict[i] = cv.bitwise_and(img_simplified, img_simplified, mask = mask_dict[i])
 
 
-
 '''FIND AND DRAW CONTOURS AND LABELS'''
 img_size = img.shape[:2]  # Columns and rows
 area_limit = 500  # Don't label feature that is too small
