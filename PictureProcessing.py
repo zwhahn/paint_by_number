@@ -103,7 +103,7 @@ def add_border(img, border_size=border_size):
     return img_border
 
 def find_label_location(blob):
-    # Calculate shortest distance from each white to a black pixel
+    # Calculate shortest distance from each white pixel to the closest black pixel
     dist_transform = cv.distanceTransform(blob, cv.DIST_L2, 3)
 
     # Return the largest distance and location of the pixel (most space for a clear number label)
