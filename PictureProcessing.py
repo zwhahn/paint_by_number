@@ -233,7 +233,7 @@ plt.title("Final Image")
 
 
 '''IMSHOW'''
-cv.imshow("Original Image", img)
+# cv.imshow("Original Image", img)
 # cv.imshow("Blurred Image", img_blur)
 # cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
