@@ -131,7 +131,7 @@ def draw_empty_contours_and_labels(mask):
         else:
             max_val, max_loc = find_label_location(blob)
 
-        # If the blob area and the distance from any wall is large enouig
+        # If the blob area and the distance from any wall is large enough
         if area > area_limit and max_val > width_limit:
             empty_contour = cv.bitwise_or(empty_contour, blob)
             if max_val > width_limit:
@@ -233,7 +233,7 @@ plt.title("Mask 1 w/ Contour")
 
 
 '''IMSHOW'''
-# cv.imshow("Original Image", img)
+cv.imshow("Original Image", img)
 # cv.imshow("Blurred Image", img_blur)
 # cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
