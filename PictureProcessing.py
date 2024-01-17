@@ -207,27 +207,27 @@ columns = 2
 
 # Add subplot in first position
 fig.add_subplot(rows, columns, 1)
-plt.imshow(cv.cvtColor(img_blur, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Original Blurred")
+plt.title("Original Image")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
 plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Simplified Image")
+plt.title("Image with Grouped Colors")
 
 # Add subplot in third position
 fig.add_subplot(rows, columns, 3)
 plt.imshow(cv.cvtColor(img_mask_dict[0], cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Mask 1")
+plt.title("Example of a Mask")
 
 # Add subplot in fourth position
 fig.add_subplot(rows, columns, 4)
-plt.imshow(cv.cvtColor(img_mask_dict[0], cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(final_image, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Mask 1 w/ Contour")
+plt.title("Final Image")
 
 # plt.show()  # display matplotlib figures 
 
