@@ -12,7 +12,8 @@ start_time = time.time()
 # img = cv.imread("./golden_gate_bridge.jpg")
 # img = cv.imread("./clifford.jpg")
 # img = cv.imread("./color_circles.jpg")
-img = cv.imread("./brad_pitt.jpg")
+# img = cv.imread("./brad_pitt.jpg")
+img = cv.imread("./mona_lisa.jpg")
 
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
@@ -32,7 +33,7 @@ img_reshape = np.float32(img_reshape)
 # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
 # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
-K = 6  # number of clusters (or colors)
+K = 10 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
@@ -85,10 +86,7 @@ for i, img_mask in img_mask_dict.items():
 
 # Check if blob is on the edge of the image
 def blob_is_on_image_edge(x_pos, y_pos, width, height, img_size = img_size):
-    if x_pos == 0 or y_pos == 0 or (x_pos + width) == img_size[1] or (y_pos + height) == img_size[0]:
-        return True
-    else:
-        return False  
+    return x_pos == 0 or y_pos == 0 or (x_pos + width) == img_size[1] or (y_pos + height) == img_size[0]
 
 # Add border to ensure distanceTransform recognizes edge of photo
 def add_border(img, border_size=border_size):
@@ -228,7 +226,7 @@ plt.imshow(cv.cvtColor(final_image, cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Final Image")
 
-# plt.show()  # display matplotlib figures 
+plt.show()  # display matplotlib figures 
 
 
 '''IMSHOW'''
