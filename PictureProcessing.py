@@ -29,6 +29,12 @@ img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
 
 '''IMAGE-TO-IMAGE GENERATION'''
+API_token_file = open(r"C:\Users\SFRZH\Documents\StabilityAIToken.txt")  # Replace with your correct file location
+API_token = API_token_file.read()
+
+os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'
+os.environ['STABILITY_KEY'] = API_token
+
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
