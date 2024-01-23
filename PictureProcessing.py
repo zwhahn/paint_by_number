@@ -8,12 +8,12 @@ import time
 start_time = time.time()
 
 # Load original image
-# img = cv.imread("./pa_logo.png")
-# img = cv.imread("./golden_gate_bridge.jpg")
-# img = cv.imread("./clifford.jpg")
-# img = cv.imread("./color_circles.jpg")
-# img = cv.imread("./brad_pitt.jpg")
-img = cv.imread("./mona_lisa.jpg")
+# img = cv.imread("./images/pa_logo.png")
+# img = cv.imread("./images/golden_gate_bridge.jpg")
+# img = cv.imread("./images/clifford.jpg")
+# img = cv.imread("./images/color_circles.jpg")
+img = cv.imread("./images/brad_pitt.jpg")
+# img = cv.imread("./images/mona_lisa.jpg")
 
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
@@ -30,11 +30,11 @@ img_reshape = img_blur.reshape((-1, 3))
 img_reshape = np.float32(img_reshape)
 
 # Define criteria, number of clusters(K), and apply kmeans()
-# cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
-# cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
+    # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
+    # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
-K = 10 # number of clusters (or colors)
-ret, label, base_colors = cv.kmeans(img_reshape, K, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
+color_quantity = 10 # number of clusters (or colors)
+ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
 # print(base_colors)
