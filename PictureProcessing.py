@@ -29,11 +29,18 @@ img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
 
 '''IMAGE-TO-IMAGE GENERATION'''
-API_token_file = open(r"C:\Users\SFRZH\Documents\StabilityAIToken.txt")  # Replace with your correct file location
-API_token = API_token_file.read()
+api_token_file = open(r"C:\Users\SFRZH\Documents\StabilityAIToken.txt")  # Replace with your correct file location
+api_token = api_token_file.read()
 
 os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'
-os.environ['STABILITY_KEY'] = API_token
+os.environ['STABILITY_KEY'] = api_token
+
+# Establish connection to Stability API
+stability_api = client.StabilityInference(
+    key = os.environ['STABILITY_KEY'],
+    verbose = True,  # Print debug messages
+    engine = "stable-diffusion-xl-1024-v1-0"  # List of available engines: https://platform.stability.ai/docs/features/api-parameters#engine
+)
 
 
 '''COLOR QUANTIZATION'''
