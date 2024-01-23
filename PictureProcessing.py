@@ -4,6 +4,15 @@ from matplotlib import pyplot as plt
 import imutils
 import time
 
+# AI Imports
+import io
+import os
+import warnings
+
+from PIL import Image
+from stability_sdk import client
+import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
+
 # Timer Start
 start_time = time.time()
 
@@ -18,6 +27,8 @@ img = cv.imread("./images/brad_pitt.jpg")
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
+
+'''IMAGE-TO-IMAGE GENERATION'''
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
@@ -226,7 +237,7 @@ plt.imshow(cv.cvtColor(final_image, cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Final Image")
 
-plt.show()  # display matplotlib figures 
+# plt.show()  # display matplotlib figures 
 
 
 '''IMSHOW'''
