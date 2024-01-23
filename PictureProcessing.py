@@ -14,6 +14,7 @@ from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
 # Timer Start
+print("Script started...")
 start_time = time.time()
 
 # Load original image
@@ -29,6 +30,11 @@ img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
 
 '''IMAGE-TO-IMAGE GENERATION'''
+# Stability API requires a PIL image, so we convert
+img_RGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+pil_img = Image.fromarray(img_RGB)
+
+# Set up environemnet 
 api_token_file = open(r"C:\Users\SFRZH\Documents\StabilityAIToken.txt")  # Replace with your correct file location
 api_token = api_token_file.read()
 
@@ -42,10 +48,14 @@ stability_api = client.StabilityInference(
     engine = "stable-diffusion-xl-1024-v1-0"  # List of available engines: https://platform.stability.ai/docs/features/api-parameters#engine
 )
 
+# Generation timer start
+print("Image-to-image generation started...")
+stability_start_time = time.time()
+
 # Generation Parameters
 answers = stability_api.generate(
-    prompt="Oil painting in the theme of Starry Night by Van Gogh", 
-    init_image=img,  # Initial image for transformation
+    prompt="Oil painting of person in the theme of Starry Night by Van Gogh", 
+    init_image=pil_img,  # Initial image for transformation
     start_schedule=0.6,  # Strength of prompt in relation to original image
     seed=123463446,
     steps=30,  # Number of intereference steps. Default is 30
@@ -66,6 +76,14 @@ for resp in answers:
         if artifact.type == generation.ARTIFACT_IMAGE:
             global img_generated
             img_generated = Image.open(io.BytesIO(artifact.binary))
+
+# Generation timer end
+stability_end_time = time.time()
+stability_total_time = (stability_end_time-stability_start_time)
+print(f'Image-to-image generation succesful. Generation Time: {stability_total_time:.4f} seconds')
+
+img_generated.show()
+
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
@@ -291,7 +309,7 @@ plt.title("Final Image")
 # Timer End
 end_time = time.time()
 total_time = (end_time-start_time)
-print(f'Run Time: {total_time:.4f} seconds')
+print(f'Script Complete. Total Run Time: {total_time:.4f} seconds')
 
-cv.imshow("Final Image", final_image)
+# cv.imshow("Final Image", final_image)
 cv.waitKey(0)  # keep images open until any key is pressed
