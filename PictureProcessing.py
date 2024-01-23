@@ -42,6 +42,30 @@ stability_api = client.StabilityInference(
     engine = "stable-diffusion-xl-1024-v1-0"  # List of available engines: https://platform.stability.ai/docs/features/api-parameters#engine
 )
 
+# Generation Parameters
+answers = stability_api.generate(
+    prompt="Oil painting in the theme of Starry Night by Van Gogh", 
+    init_image=img,  # Initial image for transformation
+    start_schedule=0.6,  # Strength of prompt in relation to original image
+    seed=123463446,
+    steps=30,  # Number of intereference steps. Default is 30
+    cfg_scale=7.0,  # Influences how strongly generation is guided to match prompt- higher values increase strength in which it tries to match prompt. Default 7.0
+    width = 512,
+    height=512,
+    sampler=generation.SAMPLER_K_DPMPP_2M  # Sampler to denoise generation with. Default is k_dpmpp_2m
+)
+
+# Trigger warning if adult content classifier is tripped
+for resp in answers:
+    for artifact in resp.artifacts:
+        if artifact.finish_reason == generation.FILTER:
+            warnings.warn(
+                "Your request activated the API's safety filters and could not be processed."
+                "Please modify the prompt and try again."
+            )
+        if artifact.type == generation.ARTIFACT_IMAGE:
+            global img_generated
+            img_generated = Image.open(io.BytesIO(artifact.binary))
 
 '''COLOR QUANTIZATION'''
 # Reshape the image to be a 2D array with 3 channels. 
