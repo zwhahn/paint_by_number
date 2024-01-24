@@ -30,6 +30,8 @@ img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
 
 '''IMAGE-TO-IMAGE GENERATION'''
+# Following example from Stability AI: https://platform.stability.ai/docs/features/image-to-image#Python
+
 # Stability API requires a PIL image, so we convert
 img_RGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 pil_img = Image.fromarray(img_RGB)
@@ -60,7 +62,7 @@ answers = stability_api.generate(
     seed=123463446,
     steps=30,  # Number of intereference steps. Default is 30
     cfg_scale=7.0,  # Influences how strongly generation is guided to match prompt- higher values increase strength in which it tries to match prompt. Default 7.0
-    width = 512,
+    width=512,
     height=512,
     sampler=generation.SAMPLER_K_DPMPP_2M  # Sampler to denoise generation with. Default is k_dpmpp_2m
 )
