@@ -44,11 +44,14 @@ os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'
 os.environ['STABILITY_KEY'] = api_token
 
 # Establish connection to Stability API
-stability_api = client.StabilityInference(
-    key = os.environ['STABILITY_KEY'],
-    verbose = True,  # Print debug messages
-    engine = "stable-diffusion-xl-1024-v1-0"  # List of available engines: https://platform.stability.ai/docs/features/api-parameters#engine
-)
+try: 
+    stability_api = client.StabilityInference(
+        key = os.environ['STABILITY_KEY'],
+        verbose = True,  # Print debug messages
+        engine = "stable-diffusion-xl-1024-v1-0"  # List of available engines: https://platform.stability.ai/docs/features/api-parameters#engine
+    )
+except:
+    print("Error: Connection to Stability API failed")
 
 # Generation timer start
 print("Image-to-image generation started...")
