@@ -62,7 +62,6 @@ answers = stability_api.generate(
     prompt="Oil painting of person in the theme of Starry Night by Van Gogh", 
     init_image=pil_img,  # Initial image for transformation
     start_schedule=0.6,  # Strength of prompt in relation to original image
-    seed=123463446,
     steps=30,  # Number of intereference steps. Default is 30
     cfg_scale=7.0,  # Influences how strongly generation is guided to match prompt- higher values increase strength in which it tries to match prompt. Default 7.0
     width=512,
@@ -87,7 +86,7 @@ stability_end_time = time.time()
 stability_total_time = (stability_end_time-stability_start_time)
 print(f'Image-to-image generation succesful. Generation Time: {stability_total_time:.4f} seconds')
 
-img_generated.show()
+# img_generated.show()
 
 
 '''COLOR QUANTIZATION'''
@@ -104,7 +103,7 @@ img_reshape = np.float32(img_reshape)
     # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
     # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
-color_quantity = 10 # number of clusters (or colors)
+color_quantity = 6 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
