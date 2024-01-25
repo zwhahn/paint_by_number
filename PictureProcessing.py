@@ -25,9 +25,6 @@ start_time = time.time()
 img = cv.imread("./images/brad_pitt.jpg")
 # img = cv.imread("./images/mona_lisa.jpg")
 
-# Blur image to reduce noise for improved edge detection
-img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
-
 
 '''IMAGE-TO-IMAGE GENERATION'''
 # Following example from Stability AI: https://platform.stability.ai/docs/features/image-to-image#Python
@@ -94,6 +91,9 @@ img_generated = cv.cvtColor(img_generated, cv.COLOR_RGB2BGR)
 
 
 '''COLOR QUANTIZATION'''
+# Blur image to reduce noise for improved edge detection
+img_blur = cv.GaussianBlur(img_generated,(7,7), sigmaX=30, sigmaY=30)
+
 # Reshape the image to be a 2D array with 3 channels. 
 # The value -1 the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
 # each pixel is a row and each column represents a column (R, G, B).
@@ -107,7 +107,7 @@ img_reshape = np.float32(img_reshape)
     # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
     # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
-color_quantity = 6 # number of clusters (or colors)
+color_quantity = 15 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
@@ -284,23 +284,23 @@ plt.title("Original Image")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
-plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_generated, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Image with Grouped Colors")
+plt.title("AI Generated Image")
 
 # Add subplot in third position
 fig.add_subplot(rows, columns, 3)
-plt.imshow(cv.cvtColor(img_mask_dict[0], cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Example of a Mask")
+plt.title(f"Image with Grouped Colors, Color Quantity: {color_quantity}")
 
 # Add subplot in fourth position
 fig.add_subplot(rows, columns, 4)
 plt.imshow(cv.cvtColor(final_image, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Final Image")
+plt.title("Final Paint-by-Number")
 
-# plt.show()  # display matplotlib figures 
+plt.show()  # display matplotlib figures 
 
 
 '''IMSHOW'''
