@@ -264,6 +264,7 @@ for color_number, label_location_list in label_locations_dict.items():
             text_size = cv.getTextSize(str(color_number + 1), font, font_scale, font_thickness)[0]
             text_width = text_size[0]
             text_height = text_size[1]
+            # Center horizontally (move position left by half the width), center vertically (move position down by half the height)
             label_location = (int(x_pos - (text_width/2)), int(y_pos + (text_height/2)))
             cv.putText(final_image, str(color_number + 1), label_location, font, font_scale, font_color, font_thickness)
             # cv.circle(final_image, label_location_circ, 3, (0,0,255), -1)  # Highlight label location (uncomment to check placement)
