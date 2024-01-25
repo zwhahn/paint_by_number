@@ -56,7 +56,7 @@ stability_start_time = time.time()
 
 # Generation Parameters
 answers = stability_api.generate(
-    prompt="In the style of vincent van gogh's Sunflowers, beatufil paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible", 
+    prompt="In the style of vincent van gogh's Sunflowers, beautiful paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible", 
     init_image=pil_img,  # Initial image for transformation
     start_schedule=0.75,  # Strength of prompt in relation to original image
     steps=30,  # Number of intereference steps. Default is 30
