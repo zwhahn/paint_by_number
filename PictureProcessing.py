@@ -78,16 +78,19 @@ for resp in answers:
                 "Please modify the prompt and try again."
             )
         if artifact.type == generation.ARTIFACT_IMAGE:
-            global img_generated
-            img_generated = Image.open(io.BytesIO(artifact.binary))
+            global img_generated_pil
+            img_generated_pil = Image.open(io.BytesIO(artifact.binary))
 
 # Generation timer end
 stability_end_time = time.time()
 stability_total_time = (stability_end_time-stability_start_time)
 print(f'Image-to-image generation succesful. Generation Time: {stability_total_time:.4f} seconds')
-
 pil_img.show()
-img_generated.show()
+img_generated_pil.show()
+
+# Convert PIL image to numpy array for OpenCV processing
+img_generated = np.array(img_generated_pil)
+img_generated = cv.cvtColor(img_generated, cv.COLOR_RGB2BGR)
 
 
 '''COLOR QUANTIZATION'''
