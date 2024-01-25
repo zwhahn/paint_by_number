@@ -59,9 +59,9 @@ stability_start_time = time.time()
 
 # Generation Parameters
 answers = stability_api.generate(
-    prompt="Oil painting of person in the theme of Starry Night by Van Gogh", 
+    prompt="In the style of vincent van gogh's Sunflowers, beatufil paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible", 
     init_image=pil_img,  # Initial image for transformation
-    start_schedule=0.6,  # Strength of prompt in relation to original image
+    start_schedule=0.75,  # Strength of prompt in relation to original image
     steps=30,  # Number of intereference steps. Default is 30
     cfg_scale=7.0,  # Influences how strongly generation is guided to match prompt- higher values increase strength in which it tries to match prompt. Default 7.0
     width=512,
@@ -86,7 +86,8 @@ stability_end_time = time.time()
 stability_total_time = (stability_end_time-stability_start_time)
 print(f'Image-to-image generation succesful. Generation Time: {stability_total_time:.4f} seconds')
 
-# img_generated.show()
+pil_img.show()
+img_generated.show()
 
 
 '''COLOR QUANTIZATION'''
