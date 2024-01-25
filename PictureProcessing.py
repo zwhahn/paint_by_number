@@ -4,7 +4,17 @@ from matplotlib import pyplot as plt
 import imutils
 import time
 
+# AI Imports
+import io
+import os
+import warnings
+
+from PIL import Image
+from stability_sdk import client
+import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
+
 # Timer Start
+print("Script started...")
 start_time = time.time()
 
 # Load original image
@@ -15,11 +25,75 @@ start_time = time.time()
 img = cv.imread("./images/brad_pitt.jpg")
 # img = cv.imread("./images/mona_lisa.jpg")
 
-# Blur image to reduce noise for improved edge detection
-img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
+
+'''IMAGE-TO-IMAGE GENERATION'''
+# Following example from Stability AI: https://platform.stability.ai/docs/features/image-to-image#Python
+
+# Stability API requires a PIL image, so we convert
+img_RGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+pil_img = Image.fromarray(img_RGB)
+
+# Set up environemnet 
+api_token_file = open(r"C:\Users\SFRZH\Documents\StabilityAIToken.txt")  # Replace with your correct file location
+api_token = api_token_file.read()
+
+os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'
+os.environ['STABILITY_KEY'] = api_token
+
+# Establish connection to Stability API
+try: 
+    stability_api = client.StabilityInference(
+        key = os.environ['STABILITY_KEY'],
+        verbose = True,  # Print debug messages
+        engine = "stable-diffusion-xl-1024-v1-0"  # List of available engines: https://platform.stability.ai/docs/features/api-parameters#engine
+    )
+except:
+    print("Error: Connection to Stability API failed")
+
+# Generation timer start
+print("Image-to-image generation started...")
+stability_start_time = time.time()
+
+# Generation Parameters
+answers = stability_api.generate(
+    prompt="In the style of vincent van gogh's Sunflowers, beatufil paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible", 
+    init_image=pil_img,  # Initial image for transformation
+    start_schedule=0.75,  # Strength of prompt in relation to original image
+    steps=30,  # Number of intereference steps. Default is 30
+    cfg_scale=7.0,  # Influences how strongly generation is guided to match prompt- higher values increase strength in which it tries to match prompt. Default 7.0
+    width=512,
+    height=512,
+    sampler=generation.SAMPLER_K_DPMPP_2M  # Sampler to denoise generation with. Default is k_dpmpp_2m
+)
+
+# Trigger warning if adult content classifier is tripped
+for resp in answers:
+    for artifact in resp.artifacts:
+        if artifact.finish_reason == generation.FILTER:
+            warnings.warn(
+                "Your request activated the API's safety filters and could not be processed."
+                "Please modify the prompt and try again."
+            )
+        if artifact.type == generation.ARTIFACT_IMAGE:
+            global img_generated_pil
+            img_generated_pil = Image.open(io.BytesIO(artifact.binary))
+
+# Generation timer end
+stability_end_time = time.time()
+stability_total_time = (stability_end_time-stability_start_time)
+print(f'Image-to-image generation succesful. Generation Time: {stability_total_time:.4f} seconds')
+pil_img.show()
+img_generated_pil.show()
+
+# Convert PIL image to numpy array for OpenCV processing
+img_generated = np.array(img_generated_pil)
+img_generated = cv.cvtColor(img_generated, cv.COLOR_RGB2BGR)
 
 
 '''COLOR QUANTIZATION'''
+# Blur image to reduce noise for improved edge detection
+img_blur = cv.GaussianBlur(img_generated,(7,7), sigmaX=30, sigmaY=30)
+
 # Reshape the image to be a 2D array with 3 channels. 
 # The value -1 the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
 # each pixel is a row and each column represents a column (R, G, B).
@@ -33,7 +107,7 @@ img_reshape = np.float32(img_reshape)
     # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
     # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
-color_quantity = 10 # number of clusters (or colors)
+color_quantity = 15 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
@@ -210,21 +284,21 @@ plt.title("Original Image")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
-plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_generated, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Image with Grouped Colors")
+plt.title("AI Generated Image")
 
 # Add subplot in third position
 fig.add_subplot(rows, columns, 3)
-plt.imshow(cv.cvtColor(img_mask_dict[0], cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Example of a Mask")
+plt.title(f"Image with Grouped Colors, Color Quantity: {color_quantity}")
 
 # Add subplot in fourth position
 fig.add_subplot(rows, columns, 4)
 plt.imshow(cv.cvtColor(final_image, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Final Image")
+plt.title("Final Paint-by-Number")
 
 plt.show()  # display matplotlib figures 
 
@@ -243,7 +317,7 @@ plt.show()  # display matplotlib figures
 # Timer End
 end_time = time.time()
 total_time = (end_time-start_time)
-print(f'Run Time: {total_time:.4f} seconds')
+print(f'Script Complete. Total Run Time: {total_time:.4f} seconds')
 
-cv.imshow("Final Image", final_image)
+# cv.imshow("Final Image", final_image)
 cv.waitKey(0)  # keep images open until any key is pressed
