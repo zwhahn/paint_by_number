@@ -147,16 +147,16 @@ border_size = 1
 
 def find_contours(img_mask, img_thresh):
     # Following method from pyimagesearch.com (https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/)
-    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(img_thresh, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
     contours = imutils.grab_contours([contours, hierarchy])  # Extract contours and returns them as a list. Output of cv.findContours can be different depending on version being used
     return hierarchy, contours
 
-hierarchy_dict = {}  # Contour hierarchy information
+# hierarchy_dict = {}  # Contour hierarchy information
 cntr_dict = {}  # Values are lists of numpy arrays, each array represents a contour
 for i, img_mask in img_mask_dict.items():
-    hierarchy, contours = find_contours(img_mask, mask_dict[i])
+    _, contours = find_contours(img_mask, mask_dict[i])
     cntr_dict[i] = contours
-    hierarchy_dict[i] = hierarchy
+    # hierarchy_dict[i] = hierarchy
 
 # Check if blob is on the edge of the image
 def blob_is_on_image_edge(x_pos, y_pos, width, height, img_size = img_size):
