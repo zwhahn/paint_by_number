@@ -1,17 +1,22 @@
 # Paint-By-Number
 
+## Table of Contents
+- [Overview](#overview)
+- [How it Works](#how-it-works)
+- [Example Outputs](#example-outputs)
+
 ## Overview
 This project is a Python script that transforms any image into a paint-by-number style image primarily using the OenCV library. Additionally, the Stability AI platform is integrated to allow the user to perform Image-to-Image generation based on the original input image. Using this AI generation is optional. 
 
 ## How it Works
 The script has 7 main sections:
-1. Image Input
-2. Image-to-Image Generation (optional)
-3. Color Quantization
-4. Color Masking
-5. Finding Contours and Label Locations
-6. Combining Masks and Drawing Contours/Labels
-7. Image Display
+1. [Image Input](image-input)
+2. [Image-to-Image Generation (optional)]()
+3. [Color Quantization](#color-quantization)
+4. [Color Masking](#color-masking)
+5. [Finding Contours and Label Locations](#finding-contours-and-label-locations)
+6. [Combining Masks and Drawing Contours/Labels](#combining-masks-and-drawing-contourslabels)
+7. [Image Display](#image-display)
 
 ### Image Input
 Images are loaded using cv.imread("/file_path"). Example images have been stored in the 'images' folder and can be easily swapped by uncommenting the corresponding image line.
