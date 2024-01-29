@@ -29,7 +29,7 @@ The user must create their own Stability AI account in order to get a unique API
 
 There is a filter that throws a warning if the adult classifier is tripped to ensure no inappropriate images are shown.
 
-Image-to-image generation is not needed for the script to run succesfully. If the user prefers paint-by-number of the original image than this section can be removed.
+Image-to-image generation is not needed for the script to run succesfully. If the user prefers paint-by-number of the original image than this section can be skipped by setting the *USE_AI* value to False.
 
 ### Color Quantization
 The script performs color quantization using k-means clustering to reduce the number of colors in the output image to a user-set number (variable name is *color_quantity*), making it possible to paint by hand.
