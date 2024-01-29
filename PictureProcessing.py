@@ -27,6 +27,9 @@ img = cv.imread("./images/brad_pitt.jpg")
 
 
 '''IMAGE-TO-IMAGE GENERATION'''
+# Set to False if you don't want AI generated image
+USE_AI = True
+
 # Following example from Stability AI: https://platform.stability.ai/docs/features/image-to-image#Python
 
 # Stability API requires a PIL image, so we convert
