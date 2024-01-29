@@ -4,6 +4,7 @@
 - [Overview](#overview)
 - [How it Works](#how-it-works)
 - [Example Outputs](#example-outputs)
+- [Future Improvements](#future-improvements)
 
 ## Overview
 This project is a Python script that transforms any image into a paint-by-number style image primarily using the OenCV library. Additionally, the Stability AI platform is integrated to allow the user to perform Image-to-Image generation based on the original input image. Using this AI generation is optional. 
@@ -79,3 +80,14 @@ Prompt: "In the style of vincent van gogh's Sunflowers, beautiful paint strokes,
 
 Output Images:
 ![Output Example: Brad Pitt in the style of Vincent Van Gogh](./process_pictures/ExampleOutput_BradPittVincentVanGogh.png)
+
+## Future Improvements
+- Integrate with Raspberry Pi and Pi camera, allowing a user to take a picture of themselves (or anything) and generate a paint by number of that instantly.
+- Connect with printer and change output file type. This will allow a user to print out the paint by number image easily.
+- Add a set color pallete that the image is grouped in. This will allow the purchase of a kit of colors and ensure the output image uses colors from that kit. This makes much more realistic for coloring in purposes. 
+- Display color pallete and associate label number for each color below 
+- Create a GUI for easy user experience. The user should be able to:
+    - Take picture (and retake if desired)
+    - Select AI filter and display the image before continuing (and regenerate if desired)
+    - Specify number of colors or complexity of output image
+    - Print paint-by-number image
