@@ -274,6 +274,11 @@ for color_number, label_location_list in label_locations_dict.items():
             # cv.circle(final_image, label_location_circ, 3, (0,0,255), -1)  # Highlight label location (uncomment to check placement)
 
 
+# Timer End
+end_time = time.time()
+total_time = (end_time-start_time)
+print(f'Script Complete. Total Run Time: {total_time:.4f} seconds')
+
 '''MATPLOTLIB DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
 fig = plt.figure(figsize=(10,7))
@@ -319,10 +324,5 @@ cv.imshow("Original Image", img)
 # cv.imshow("Mask Image 2", img_mask_dict[1])
 # cv.imshow("Mask Image 3", img_mask_dict[2])
 cv.imshow("Final Image", final_image)
-
-# Timer End
-end_time = time.time()
-total_time = (end_time-start_time)
-print(f'Script Complete. Total Run Time: {total_time:.4f} seconds')
 
 cv.waitKey(0)  # keep images open until any key is pressed
