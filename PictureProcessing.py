@@ -294,15 +294,16 @@ plt.title("Original Image")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
-plt.imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
-plt.axis('off')
-plt.title("AI Generated Image")
-
-# Add subplot in third position
-fig.add_subplot(rows, columns, 3)
 plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title(f"Image with Grouped Colors, Color Quantity: {color_quantity}")
+
+# Add subplot in third position
+fig.add_subplot(rows, columns, 3)
+plt.imshow(cv.cvtColor(img_mask_dict[0], cv.COLOR_BGR2RGB))
+plt.axis('off')
+plt.title("Example of Image Mask")
+
 
 # Add subplot in fourth position
 fig.add_subplot(rows, columns, 4)
@@ -310,7 +311,7 @@ plt.imshow(cv.cvtColor(final_image, cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Final Paint-by-Number")
 
-# plt.show()  # display matplotlib figures 
+plt.show()  # display matplotlib figures 
 
 
 '''IMSHOW'''

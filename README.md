@@ -68,18 +68,24 @@ The second method OpenCV's *imshow*. This displays each image in it's own window
 
 ## Example Outputs
 
-### Without AI
-Input Image: ![Brad Pitt headshot](./images/brad_pitt.jpg)
+Input Image: 
 
-Output Image: ![Output Example: Brad Pitt paint by number](./process_pictures/OutputExample_BradPittSimple.png)
+![Brad Pitt headshot](./images/brad_pitt.jpg)
+
+
+### Without AI
+
+
+Output Image: 
+
+![Output Example: Brad Pitt paint by number](./process_pictures/ExampleOutput_BradPittSimple.png)
 
 
 ### With AI Generated (Color Quantity: 15)
-Input Image: Same as above
-
-Prompt: "In the style of vincent van gogh's Sunflowers, beautiful paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible"
+**Prompt: "In the style of vincent van gogh's Sunflowers, beautiful paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible"**
 
 Output Images:
+
 ![Output Example: Brad Pitt in the style of Vincent Van Gogh](./process_pictures/ExampleOutput_BradPittVincentVanGogh.png)
 
 ## Future Improvements
