@@ -70,7 +70,8 @@ The second method OpenCV's *imshow*. This displays each image in it's own window
 
 ### Without AI
 Input Image: ![Brad Pitt headshot](./images/brad_pitt.jpg)
-Output Image: **To be Added**
+
+Output Image: ![Output Example: Brad Pitt paint by number](./process_pictures/OutputExample_BradPittSimple.png)
 
 
 ### With AI Generated (Color Quantity: 15)
