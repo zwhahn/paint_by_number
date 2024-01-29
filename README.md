@@ -39,5 +39,11 @@ Next, the k-means clustering algorithm is run, which is a way of grouping simila
 2. It creates masks for each base color, using the cv.inRange function. This function takes the simplified image, the lower and upper limits of the color range, and returns a binary image where each pixel that falls within the range is set to white (255) and the rest are set to black (0). It stores these masks in another dictionary, where the key is the cluster index and the value is the mask image.
 3. It applies the masks to the simplified image, using the cv.bitwise_and function. This function takes the simplified image, a copy of the simplified image, and a mask image, and returns an image where only the pixels that are white in the mask are kept from the simplified image. It stores these masked images in a third dictionary, where the key is the cluster index and the value is the masked image.
 
-### Finding and Drawing Contours/Labels
-Using the openCV function connectComponents, the script is now able to break masked region into independent areas or 'blobs'. 
+### Finding Contours and Label Locations
+First, the *findContours* is used to collect the contours of every mask. This will be used for drawing the final image.
+
+Using the openCV function connectComponents, the script is now able to break masked region into independent areas or 'blobs'. Next, one at a time, each blob is drawn on top of an empty mask so there is a black background with a single white blob on it. This single-blob mask is then passed into the *find_label_location* function. *find_label_location* uses distanceTransform to find the furthest any point in the blob is away from the border. This is the optimal location for the number label because it has the most amount of space around it for readability purposes. These locations are saved in *label_locations_dict*.
+
+Important note: distanceTransform function doesn’t consider the border of the image as an edge. As a result, it labels the border as the farthest point from any other edge in the image. In order to avoid this, the function *blob_is_on_image_edge* checks if the blob is on the image border and if it is, it will add a border with a thickness of 1px so distanceTransform recogniuzes the border as a place the label should not be near.
+
+### Combining Masks and Drawing Contours/Labels
