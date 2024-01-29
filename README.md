@@ -10,8 +10,8 @@ This project is a Python script that transforms any image into a paint-by-number
 
 ## How it Works
 The script has 7 main sections:
-1. [Image Input](image-input)
-2. [Image-to-Image Generation (optional)]()
+1. [Image Input](#image-input)
+2. [Image-to-Image Generation (optional)](#image-to-image-generation-optional)
 3. [Color Quantization](#color-quantization)
 4. [Color Masking](#color-masking)
 5. [Finding Contours and Label Locations](#finding-contours-and-label-locations)
