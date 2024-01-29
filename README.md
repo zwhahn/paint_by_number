@@ -58,4 +58,6 @@ Finally, the *label_locations_dict* is looped through and drawn on the image. Th
 ### Image Display
 There are 2 methods to display the images. The first is matplotlib. matplotlib can be used to display images next to each other on the same plot but it takes a little longer to open.
 
-The second method OpenCV's *imshow*. This displays each image in it's own window but opens more quickly. 
+The second method OpenCV's *imshow*. This displays each image in it's own window but opens more quickly.
+
+## Example Output
