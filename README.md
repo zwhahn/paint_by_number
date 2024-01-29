@@ -60,4 +60,17 @@ There are 2 methods to display the images. The first is matplotlib. matplotlib c
 
 The second method OpenCV's *imshow*. This displays each image in it's own window but opens more quickly.
 
-## Example Output
+## Example Outputs
+
+### Without AI
+Input Image: ![Brad Pitt headshot](./images/brad_pitt.jpg)
+Output Image: **To be Added**
+
+
+### With AI Generated (Color Quantity: 15)
+Input Image: Same as above
+
+Prompt: "In the style of vincent van gogh's Sunflowers, beautiful paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible"
+
+Output Images:
+![Output Example: Brad Pitt in the style of Vincent Van Gogh](./process_pictures/ExampleOutput_BradPittVincentVanGogh.png)
