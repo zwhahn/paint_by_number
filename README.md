@@ -9,8 +9,8 @@ The script has 7 main sections:
 2. Image-to-Image Generation (optional)
 3. Color Quantization
 4. Color Masking
-5. Finding and Drawing Contours/Labels
-6. Combining Final Images
+5. Finding Contours and Label Locations
+6. Combining Masks and Drawing Contours/Labels
 7. Image Display
 
 ### Image Input
@@ -46,4 +46,16 @@ Using the openCV function connectComponents, the script is now able to break mas
 
 Important note: distanceTransform function doesn’t consider the border of the image as an edge. As a result, it labels the border as the farthest point from any other edge in the image. In order to avoid this, the function *blob_is_on_image_edge* checks if the blob is on the image border and if it is, it will add a border with a thickness of 1px so distanceTransform recogniuzes the border as a place the label should not be near.
 
+Finally, the white blobs are all combined onto a single mask called *empty_contour*. There is an if statement to check the blob is large enough or wide enough to be drawn. If it is too small/narrow, that blob will not be added. 
+
 ### Combining Masks and Drawing Contours/Labels
+All *empty_contour*'s are combined with their original mask to create a *blended_image*. This covers all color regions with the white blobs except for the areas that were too small to draw the blob in the *empty_contour*. This ensures the areas that are too small will already be colored so the user does not need to color them in. Next, all *empty_contours* are combined into a single image- *final_image* (this is all white, excpt for the regions that are too small, because each blob is white and there should be no background (black) showing). 
+
+Next, the contours are drawn on top of the *final_image* to divide the region between the white areas. 
+
+Finally, the *label_locations_dict* is looped through and drawn on the image. There is a check to make sure only white areas are being labeled (regions with color don't need to be colored in by the user).
+
+### Image Display
+There are 2 methods to display the images. The first is matplotlib. matplotlib can be used to display images next to each other on the same plot but it takes a little longer to open.
+
+The second method OpenCV's *imshow*. This displays each image in it's own window but opens more quickly. 
