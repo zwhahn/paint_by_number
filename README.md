@@ -72,7 +72,7 @@ The second method OpenCV's *imshow*. This displays each image in it's own window
 1. Navigate to your working directory and clone the repository to your local device using `git clone ssh://clone.link.here`
 2. While still in the working directory, install all dependencies using the *requirements.txt* file: `pip install -r requirements.txt`
 
-The PictureProcessing.py should now be able to run **without AI (*USE_AI = False*)**. In order to use the AI image generation, continue following these instructions.
+*PictureProcessing.py* should now be able to run **without AI (*USE_AI = False*)**. In order to use the AI image generation, continue following these instructions.
 
 3. Head to [Stability AI's API key manager](https://platform.stability.ai/account/keys). If you do not have an account, you will need to create one.
 4. Create an API key. 
