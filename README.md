@@ -3,6 +3,7 @@
 ## Table of Contents
 - [Overview](#overview)
 - [How it Works](#how-it-works)
+- [How to use it](#how-to-use-it)
 - [Example Outputs](#example-outputs)
 - [Future Improvements](#future-improvements)
 
@@ -65,6 +66,26 @@ Finally, the *label_locations_dict* is looped through and drawn on the image. Th
 There are 2 methods to display the images. The first is matplotlib. matplotlib can be used to display images next to each other on the same plot but it takes a little longer to open.
 
 The second method OpenCV's *imshow*. This displays each image in it's own window but opens more quickly.
+
+## How to Run the Script
+
+1. Navigate to your working directory and clone the repository to your local device using `git clone ssh://clone.link.here`
+2. While still in the working directory, install all dependencies using the *requirements.txt* file: `pip install -r requirements.txt`
+
+The PictureProcessing.py should now be able to run **without AI (*USE_AI = False*)**. In order to use the AI image generation, continue following these instructions.
+
+3. Head to [Stability AI's API key manager](https://platform.stability.ai/account/keys). If you do not have an account, you will need to create one.
+4. Create an API key. 
+5. Create a blank .txt file and copy the provided API key into this file. **Save this file locally, you do not want other people using your credits.**
+6. Update the following line of code in *PictureProcessing.py* with the file path to the .txt file that now has your API key:
+```
+# Replace with your correct file path
+api_token_file = open(r"your/file/path.txt") 
+```
+Done! The script should now be able to run with AI image-to-image generation. You can change the prompt however you like. 
+
+**Important Note: Stability AI provides only 25 free tokens to a new account (unclear how many images this is). Once this limit is hit, you will not be able to use the AI feature unless you pay for more tokens. [Stability AI Token Pricing](https://platform.stability.ai/account/credits)**
+
 
 ## Example Outputs
 
