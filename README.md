@@ -89,23 +89,14 @@ Done! The script should now be able to run with AI image-to-image generation. Yo
 
 ## Example Outputs
 
-Input Image: 
-
-![Brad Pitt headshot](./images/brad_pitt.jpg)
-
 
 ### Without AI
-
-
-Output Image: 
 
 ![Output Example: Brad Pitt paint by number](./process_pictures/ExampleOutput_BradPittSimple.png)
 
 
-### With AI Generated (Color Quantity: 15)
+### With AI Image-to-Image Generation (Color Quantity: 15)
 **Prompt: "In the style of vincent van gogh's Sunflowers, beautiful paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible"**
-
-Output Images:
 
 ![Output Example: Brad Pitt in the style of Vincent Van Gogh](./process_pictures/ExampleOutput_BradPittVincentVanGogh.png)
 
