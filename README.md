@@ -3,7 +3,7 @@
 ## Table of Contents
 - [Overview](#overview)
 - [How it Works](#how-it-works)
-- [How to use it](#how-to-use-it)
+- [How to Run the Script](#how-to-run-the-script)
 - [Example Outputs](#example-outputs)
 - [Future Improvements](#future-improvements)
 
