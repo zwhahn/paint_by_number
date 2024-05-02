@@ -13,6 +13,28 @@ from PIL import Image
 from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
+'''TAKE PICTURE'''
+# Followed examples from https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
+
+# Start video object, 0 uses first camera available
+vid = cv.VideoCapture(0)
+print("Camera On!")
+print("Press 'y' to capture an image!")
+
+while (True):
+    ret, frame = vid.read()
+    cv.imshow('frame', frame)
+
+    
+    if cv.waitKey(1) & 0x0FF == ord('y'):
+        print("Image Captured!")
+        cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
+        break
+
+# Shut down video object
+vid.release()
+
+
 # Timer Start
 print("Script started...")
 start_time = time.time()
@@ -22,24 +44,9 @@ start_time = time.time()
 # img = cv.imread("./images/golden_gate_bridge.jpg")
 # img = cv.imread("./images/clifford.jpg")
 # img = cv.imread("./images/color_circles.jpg")
-img = cv.imread("./images/brad_pitt.jpg")
+# img = cv.imread("./images/brad_pitt.jpg")
 # img = cv.imread("./images/mona_lisa.jpg")
-
-'''TAKE PICTURE'''
-vid = cv.VideoCapture(0)
-
-while (True):
-    ret, frame = vid.read()
-    cv.imshow('frame', frame)
-
-    if cv.waitKey(1) & 0x0FF == ord('y'):
-        print("Image Captured")
-        cv.imwrite('./images/capture.png', frame)
-
-    if cv.waitKey(1) & 0xFF == ord('q'):
-        break
-
-vid.release()
+img = cv.imread("./images/capture.png")
 
 
 '''IMAGE-TO-IMAGE GENERATION'''
