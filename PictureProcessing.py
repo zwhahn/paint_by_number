@@ -343,13 +343,13 @@ plt.imshow(cv.cvtColor(final_image, cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Final Paint-by-Number")
 
-plt.show()  # display matplotlib figures 
+# plt.show()  # display matplotlib figures 
 
 
 '''IMSHOW'''
 cv.imshow("Original Image", img)
 # cv.imshow("Blurred Image", img_blur)
-# cv.imshow("Simplified Image", img_simplified)
+cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Mask Image 1", img_mask_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
