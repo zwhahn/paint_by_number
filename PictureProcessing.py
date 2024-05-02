@@ -16,23 +16,29 @@ import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 '''TAKE PICTURE'''
 # Followed examples from https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
 
-# Start video object, 0 uses first camera available
-vid = cv.VideoCapture(0)
-print("Camera On!")
-print("Press 'y' to capture an image!")
+TAKING_PICTURE = False
 
-while (True):
-    ret, frame = vid.read()
-    cv.imshow('frame', frame)
+if TAKING_PICTURE:
+    # Start video object, 0 uses first camera available
+    vid = cv.VideoCapture(0)
+    print("Camera On!")
+    print("Press 'y' to capture an image!")
 
-    
-    if cv.waitKey(1) & 0x0FF == ord('y'):
-        print("Image Captured!")
-        cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
-        break
+    while (True):
+        ret, frame = vid.read()
+        cv.imshow('frame', frame)
 
-# Shut down video object
-vid.release()
+        
+        if cv.waitKey(1) & 0x0FF == ord('y'):
+            print("Image Captured!")
+            cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
+            break
+
+    # Shut down video object
+    vid.release()
+if not TAKING_PICTURE:
+    print("Not taking picture, using previously loaded one. If this incorrect, check 'TAKING_PICTURE' variable.")
+
 
 
 # Timer Start
