@@ -25,6 +25,22 @@ start_time = time.time()
 img = cv.imread("./images/brad_pitt.jpg")
 # img = cv.imread("./images/mona_lisa.jpg")
 
+'''TAKE PICTURE'''
+vid = cv.VideoCapture(0)
+
+while (True):
+    ret, frame = vid.read()
+    cv.imshow('frame', frame)
+
+    if cv.waitKey(1) & 0x0FF == ord('y'):
+        print("Image Captured")
+        cv.imwrite('./images/capture.png', frame)
+
+    if cv.waitKey(1) & 0xFF == ord('q'):
+        break
+
+vid.release()
+
 
 '''IMAGE-TO-IMAGE GENERATION'''
 # Set to False if you don't want AI generated image
