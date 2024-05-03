@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt 
 import imutils
 import time
-import threading
+import math
 
 # AI Imports
 import io
@@ -15,14 +15,6 @@ from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
 '''TAKE PICTURE'''
-count = [None]
-def countdown():
-    for i in range(3, 0, -1):
-        count[0] = i
-        time.sleep(1)
-
-countdown_thread = threading.Thread(target=countdown)
-
 # Followed example from https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
 TAKING_PICTURE = True
 
@@ -36,21 +28,34 @@ if TAKING_PICTURE:
     x_center = int(vid.get(cv.CAP_PROP_FRAME_WIDTH)/2)
     y_center = int(vid.get(cv.CAP_PROP_FRAME_HEIGHT)/2)
 
+    font = cv.FONT_HERSHEY_SIMPLEX
+    countdown = 3
+    start_time = None
+    elapsed_time = 1
+
     while (True):
         ret, frame = vid.read()
+
+        if start_time is not None:
+            elapsed_time = int(countdown - ((time.time() - start_time) //1))
+            if elapsed_time > 0:
+                cv.putText(frame, str(elapsed_time), (y_center, x_center), font, 7, (0, 0, 0), 20, cv.FILLED) 
+
+
+        if cv.waitKey(1) & 0x0FF == ord('y'):
+            print("Countdown Started")
+            start_time = time.time()
+
+        if cv.waitKey(1) & 0x0FF == ord('q'):
+            break
+        
         cv.imshow('frame', frame)
 
-        
-        if cv.waitKey(1) & 0x0FF == ord('y'):
-            # Countdown timer
-            font = cv.FONT_HERSHEY_SIMPLEX
-            countdown_thread.start()
-            cv.putText(frame, str(count[0]), (x_center,y_center), font, 7, (0, 0, 0), 20, cv.FILLED)
-            if count[0] == 0:
-                print("Image Captured!")
-                cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
-                break
-
+        if elapsed_time == 0:
+            print("Image Captured!")
+            cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
+            break
+               
     # Shut down video object
     vid.release()
 if not TAKING_PICTURE:
@@ -59,7 +64,7 @@ if not TAKING_PICTURE:
 
 
 # Timer Start
-print("Script started...")
+print("Generating paint-by-number...")
 start_time = time.time()
 
 # Load original image
