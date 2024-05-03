@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt 
 import imutils
 import time
+import threading
 
 # AI Imports
 import io
@@ -14,8 +15,15 @@ from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
 '''TAKE PICTURE'''
-# Followed examples from https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
+count = [None]
+def countdown():
+    for i in range(3, 0, -1):
+        count[0] = i
+        time.sleep(1)
 
+countdown_thread = threading.Thread(target=countdown)
+
+# Followed example from https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
 TAKING_PICTURE = True
 
 if TAKING_PICTURE:
@@ -35,14 +43,13 @@ if TAKING_PICTURE:
         
         if cv.waitKey(1) & 0x0FF == ord('y'):
             # Countdown timer
-            width = vid.get
             font = cv.FONT_HERSHEY_SIMPLEX
-
-            cv.putText(frame, '3', (x_center,y_center), font, 7, (0, 0, 0), 20, cv.FILLED)
-
-            print("Image Captured!")
-            cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
-            break
+            countdown_thread.start()
+            cv.putText(frame, str(count[0]), (x_center,y_center), font, 7, (0, 0, 0), 20, cv.FILLED)
+            if count[0] == 0:
+                print("Image Captured!")
+                cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
+                break
 
     # Shut down video object
     vid.release()
