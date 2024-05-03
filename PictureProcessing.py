@@ -15,33 +15,34 @@ from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
 '''TAKE PICTURE'''
-# Followed example from https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
 TAKING_PICTURE = True
 
 if TAKING_PICTURE:
-    # Start video object, 0 uses first camera available
     print("Starting Camera...")
-    vid = cv.VideoCapture(0)
-    print("Camera On!")
-    print("Press 'y' to capture an image!")
 
+    # Start video object, 0 uses first camera available
+    vid = cv.VideoCapture(0)
+    print("Camera On! Press 'y' to capture an image!")
+
+    # Calculate center of frame for countdown position
     x_center = int(vid.get(cv.CAP_PROP_FRAME_WIDTH)/2)
     y_center = int(vid.get(cv.CAP_PROP_FRAME_HEIGHT)/2)
 
+    # Initial variable values
     font = cv.FONT_HERSHEY_SIMPLEX
     countdown = 3
     start_time = None
-    elapsed_time = 1
+    remaining_time = 1
 
     while (True):
         ret, frame = vid.read()
 
-        if start_time is not None:
-            elapsed_time = int(countdown - ((time.time() - start_time) //1))
-            if elapsed_time > 0:
-                cv.putText(frame, str(elapsed_time), (y_center, x_center), font, 7, (0, 0, 0), 20, cv.FILLED) 
+        if start_time is not None:  # Dont add text to image until timer has started
+            remaining_time = int(countdown - ((time.time() - start_time) //1))
+            if remaining_time > 0:  # If there is no remaining time than we should not alter the frame, otherwise add countdown
+                cv.putText(frame, str(remaining_time), (y_center, x_center), font, 7, (0, 0, 0), 20, cv.FILLED) 
 
-
+        # Press 'y' to start countdown
         if cv.waitKey(1) & 0x0FF == ord('y'):
             print("Countdown Started")
             start_time = time.time()
@@ -49,20 +50,22 @@ if TAKING_PICTURE:
         if cv.waitKey(1) & 0x0FF == ord('q'):
             break
         
-        cv.imshow('frame', frame)
+        cv.imshow('frame', frame)  # Display video feed
 
-        if elapsed_time == 0:
+        # Once the countdown is over, the image is captured and saved to the images folder
+        if remaining_time == 0:
             print("Image Captured!")
             cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
             break
                
     # Shut down video object
     vid.release()
+
 if not TAKING_PICTURE:
     print("Not taking new picture, using previously loaded one. If this incorrect, check 'TAKING_PICTURE' variable.")
 
 
-
+'''LOAD IMAGE'''
 # Timer Start
 print("Generating paint-by-number...")
 start_time = time.time()
@@ -74,7 +77,7 @@ start_time = time.time()
 # img = cv.imread("./images/color_circles.jpg")
 # img = cv.imread("./images/brad_pitt.jpg")
 # img = cv.imread("./images/mona_lisa.jpg")
-img = cv.imread("./images/capture.png")
+img = cv.imread("./images/capture.png")  # The video captured image
 
 
 '''IMAGE-TO-IMAGE GENERATION'''
