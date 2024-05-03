@@ -16,10 +16,11 @@ import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 '''TAKE PICTURE'''
 # Followed examples from https://www.geeksforgeeks.org/python-opencv-capture-video-from-camera/
 
-TAKING_PICTURE = False
+TAKING_PICTURE = True
 
 if TAKING_PICTURE:
     # Start video object, 0 uses first camera available
+    print("Starting Camera...")
     vid = cv.VideoCapture(0)
     print("Camera On!")
     print("Press 'y' to capture an image!")
@@ -30,6 +31,11 @@ if TAKING_PICTURE:
 
         
         if cv.waitKey(1) & 0x0FF == ord('y'):
+            # Countdown timer
+            font = cv.FONT_HERSHEY_COMPLEX
+
+            cv.putText(frame, 'COUNTDOWN', (50,50), font, 1, (255,255,255), 2, cv.LINE_4)
+
             print("Image Captured!")
             cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
             break
@@ -37,7 +43,7 @@ if TAKING_PICTURE:
     # Shut down video object
     vid.release()
 if not TAKING_PICTURE:
-    print("Not taking picture, using previously loaded one. If this incorrect, check 'TAKING_PICTURE' variable.")
+    print("Not taking new picture, using previously loaded one. If this incorrect, check 'TAKING_PICTURE' variable.")
 
 
 
