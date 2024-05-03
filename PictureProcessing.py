@@ -25,6 +25,9 @@ if TAKING_PICTURE:
     print("Camera On!")
     print("Press 'y' to capture an image!")
 
+    x_center = int(vid.get(cv.CAP_PROP_FRAME_WIDTH)/2)
+    y_center = int(vid.get(cv.CAP_PROP_FRAME_HEIGHT)/2)
+
     while (True):
         ret, frame = vid.read()
         cv.imshow('frame', frame)
@@ -32,9 +35,10 @@ if TAKING_PICTURE:
         
         if cv.waitKey(1) & 0x0FF == ord('y'):
             # Countdown timer
-            font = cv.FONT_HERSHEY_COMPLEX
+            width = vid.get
+            font = cv.FONT_HERSHEY_SIMPLEX
 
-            cv.putText(frame, 'COUNTDOWN', (50,50), font, 1, (255,255,255), 2, cv.LINE_4)
+            cv.putText(frame, '3', (x_center,y_center), font, 7, (0, 0, 0), 20, cv.FILLED)
 
             print("Image Captured!")
             cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
