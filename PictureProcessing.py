@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt 
 import imutils
 import time
+import math
 
 # AI Imports
 import io
@@ -13,8 +14,60 @@ from PIL import Image
 from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
+'''TAKE PICTURE'''
+TAKING_PICTURE = True
+
+if TAKING_PICTURE:
+    print("Starting Camera...")
+
+    # Start video object, 0 uses first camera available
+    vid = cv.VideoCapture(0)
+    print("Camera On! Press 'y' to capture an image!")
+
+    # Calculate center of frame for countdown position
+    x_center = int(vid.get(cv.CAP_PROP_FRAME_WIDTH)/2)
+    y_center = int(vid.get(cv.CAP_PROP_FRAME_HEIGHT)/2)
+
+    # Initial variable values
+    font = cv.FONT_HERSHEY_SIMPLEX
+    countdown = 3
+    start_time = None
+    remaining_time = 1
+
+    while (True):
+        ret, frame = vid.read()
+
+        if start_time is not None:  # Dont add text to image until timer has started
+            remaining_time = int(countdown - ((time.time() - start_time) //1))
+            if remaining_time > 0:  # If there is no remaining time than we should not alter the frame, otherwise add countdown
+                cv.putText(frame, str(remaining_time), (y_center, x_center), font, 7, (0, 0, 0), 20, cv.FILLED) 
+
+        # Press 'y' to start countdown
+        if cv.waitKey(1) & 0x0FF == ord('y'):
+            print("Countdown Started")
+            start_time = time.time()
+
+        if cv.waitKey(1) & 0x0FF == ord('q'):
+            break
+        
+        cv.imshow('frame', frame)  # Display video feed
+
+        # Once the countdown is over, the image is captured and saved to the images folder
+        if remaining_time == 0:
+            print("Image Captured!")
+            cv.imwrite('./images/capture.png', frame)  # overwrites the last captured image
+            break
+               
+    # Shut down video object
+    vid.release()
+
+if not TAKING_PICTURE:
+    print("Not taking new picture, using previously loaded one. If this incorrect, check 'TAKING_PICTURE' variable.")
+
+
+'''LOAD IMAGE'''
 # Timer Start
-print("Script started...")
+print("Generating paint-by-number...")
 start_time = time.time()
 
 # Load original image
@@ -22,8 +75,9 @@ start_time = time.time()
 # img = cv.imread("./images/golden_gate_bridge.jpg")
 # img = cv.imread("./images/clifford.jpg")
 # img = cv.imread("./images/color_circles.jpg")
-img = cv.imread("./images/brad_pitt.jpg")
+# img = cv.imread("./images/brad_pitt.jpg")
 # img = cv.imread("./images/mona_lisa.jpg")
+img = cv.imread("./images/capture.png")  # The video captured image
 
 
 '''IMAGE-TO-IMAGE GENERATION'''
@@ -314,13 +368,13 @@ plt.imshow(cv.cvtColor(final_image, cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Final Paint-by-Number")
 
-plt.show()  # display matplotlib figures 
+# plt.show()  # display matplotlib figures 
 
 
 '''IMSHOW'''
 cv.imshow("Original Image", img)
 # cv.imshow("Blurred Image", img_blur)
-# cv.imshow("Simplified Image", img_simplified)
+cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Mask Image 1", img_mask_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
