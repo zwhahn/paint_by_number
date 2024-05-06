@@ -3,7 +3,6 @@ import numpy as np
 from matplotlib import pyplot as plt 
 import imutils
 import time
-import math
 
 # AI Imports
 import io
@@ -15,7 +14,7 @@ from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
 '''TAKE PICTURE'''
-TAKING_PICTURE = True
+TAKING_PICTURE = False
 
 if TAKING_PICTURE:
     print("Starting Camera...")
@@ -77,7 +76,7 @@ start_time = time.time()
 # img = cv.imread("./images/color_circles.jpg")
 # img = cv.imread("./images/brad_pitt.jpg")
 # img = cv.imread("./images/mona_lisa.jpg")
-img = cv.imread("./images/capture.png")  # The video captured image
+# img = cv.imread("./images/capture.png")  # The video captured image
 
 
 '''IMAGE-TO-IMAGE GENERATION'''
