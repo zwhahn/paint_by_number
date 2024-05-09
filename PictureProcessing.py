@@ -389,5 +389,4 @@ cv.waitKey(0)  # keep images open until any key is pressed
 # Convert numpy array to .jpg format
 final_image = Image.fromarray(final_image)
 final_image.save("./images/final_image.jpg")
-
 CreatePDF("./images/final_image.jpg")
