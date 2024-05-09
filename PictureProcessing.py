@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt 
 import imutils
 import time
+from PrinterFormat import CreatePDF
 
 # AI Imports
 import io
@@ -76,7 +77,7 @@ start_time = time.time()
 # img = cv.imread("./images/color_circles.jpg")
 # img = cv.imread("./images/brad_pitt.jpg")
 # img = cv.imread("./images/mona_lisa.jpg")
-# img = cv.imread("./images/capture.png")  # The video captured image
+img = cv.imread("./images/capture.png")  # The video captured image
 
 
 '''IMAGE-TO-IMAGE GENERATION'''
@@ -371,15 +372,22 @@ plt.title("Final Paint-by-Number")
 
 
 '''IMSHOW'''
-cv.imshow("Original Image", img)
+# cv.imshow("Original Image", img)
 # cv.imshow("Blurred Image", img_blur)
-cv.imshow("Simplified Image", img_simplified)
+# cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Mask Image 1", img_mask_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
 # cv.imshow("Mask Image 2", img_mask_dict[1])
 # cv.imshow("Mask Image 3", img_mask_dict[2])
-cv.imshow("Final Image", final_image)
+# cv.imshow("Final Image", final_image)
 
 cv.waitKey(0)  # keep images open until any key is pressed
+
+'''GENERATE PDF'''
+# Convert numpy array to .jpg format
+final_image = Image.fromarray(final_image)
+final_image.save("./images/final_image.jpg")
+
+CreatePDF("./images/final_image.jpg")
