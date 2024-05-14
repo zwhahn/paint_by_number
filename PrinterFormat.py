@@ -4,7 +4,7 @@ from reportlab.lib.units import inch
 from reportlab.graphics import shapes
 
 pa_logo_path = "./images/pa_logo.png"
-color_square_size = 0.5*inch # [inch]
+color_square_size = 0.7*inch # [inch]
 
 def CreatePDF(img, base_colors):
     # Create blank PDF 
@@ -22,7 +22,7 @@ def CreatePDF(img, base_colors):
 
         # Desired center position
         if 0 <= num <= 2:
-            center_y = 3*inch
+            center_y = 3.7*inch
             if num == 0:
                 center_x = (8.5/3)*inch
             if num == 1:   
@@ -31,7 +31,7 @@ def CreatePDF(img, base_colors):
                 center_x = ((2*8.5)/3)*inch
 
         if 3 <= num <= 5:
-            center_y = 2*inch
+            center_y = 2.4*inch
             if num == 3:
                 center_x = (8.5/3)*inch
             if num == 4:   
