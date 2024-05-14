@@ -4,6 +4,7 @@ from reportlab.lib.units import inch
 from reportlab.graphics import shapes
 
 pa_logo_path = "./images/pa_logo.png"
+color_square_size = 0.5*inch
 
 def CreatePDF(img, base_colors):
     # Create blank PDF 
@@ -18,15 +19,18 @@ def CreatePDF(img, base_colors):
     # Add color/number legend
     for num in range(len(base_colors)):
         color = base_colors[num]
-        print("color:", color)
-        print("num:", num)
         pos_x = num*inch
         pos_y = 1*inch
+
+        # Map 0-255 value to 0-1 range used by reportlab
+        # The base colors are in BGR format so the color orders are reversed
         R_map = num_to_range(color[2])
         G_map = num_to_range(color[1])
         B_map = num_to_range(color[0])
         canvas.setFillColorRGB(R_map, G_map, B_map)
-        canvas.rect(pos_x, pos_y, 0.5*inch, 0.5*inch, fill=True)
+
+        # Draw the filled recangle
+        canvas.rect(pos_x, pos_y, color_square_size, color_square_size, fill=True)
     
     # Save pdf to parent directory
     canvas.save()
