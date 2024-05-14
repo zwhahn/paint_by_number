@@ -172,7 +172,6 @@ color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
-# print(base_colors)
 img_simplified = base_colors[label.flatten()]  # Replace each picel with its corresponding base color
 img_simplified = img_simplified.reshape((img.shape))
 
@@ -389,4 +388,4 @@ cv.waitKey(0)  # keep images open until any key is pressed
 # Convert numpy array to .jpg format
 final_image = Image.fromarray(final_image)
 final_image.save("./images/final_image.jpg")
-CreatePDF("./images/final_image.jpg")
+CreatePDF("./images/final_image.jpg", base_colors)
