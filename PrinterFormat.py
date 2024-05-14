@@ -1,5 +1,8 @@
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import LETTER
+from reportlab.lib.units import inch
+
+pa_logo_path = "./images/pa_logo.png"
 
 def CreatePDF(img):
     # Create blank PDF 
@@ -9,7 +12,7 @@ def CreatePDF(img):
     canvas.drawImage(img, 30, 310, width=550, preserveAspectRatio=True)
 
     # Add PA logo 
-    canvas.drawImage("./images/pa_logo.png", 0, 0, width=150, preserveAspectRatio=True)
+    canvas.drawImage(pa_logo_path, 0, 0, preserveAspectRatio=True)
 
     # Save pdf to parent directory
     canvas.save()
