@@ -20,7 +20,7 @@ def CreatePDF(img, base_colors):
     for num in range(len(base_colors)):
         color = base_colors[num]
 
-        # Desired center position
+        # Create 3x3 grid
         if 0 <= num <= 2:
             center_y = 3.7*inch
             if num == 0:
@@ -48,15 +48,9 @@ def CreatePDF(img, base_colors):
             if num == 8:
                 center_x = ((2*8.5)/3)*inch
 
-        print("center_x:", center_x)
-        print("center_y:", center_y)
-
         # Rectangle position is placed by bottom left corner, so that position is calculated
         pos_x = center_x - (color_square_size/2)
         pos_y = center_y - (color_square_size/2)
-
-        print("pos_x:", pos_x)
-        print("pos_y:", pos_y)
 
         # Map 0-255 value to 0-1 range used by reportlab
         # The base colors are in BGR format so the color orders are reversed
