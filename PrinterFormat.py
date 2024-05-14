@@ -12,7 +12,7 @@ def CreatePDF(img):
     canvas.drawImage(img, 30, 310, width=550, preserveAspectRatio=True)
 
     # Add PA logo 
-    canvas.drawImage(pa_logo_path, 0, 0, preserveAspectRatio=True)
+    canvas.drawImage(pa_logo_path, 7.1*inch, 0.3*inch, preserveAspectRatio=True)
 
     # Save pdf to parent directory
     canvas.save()
