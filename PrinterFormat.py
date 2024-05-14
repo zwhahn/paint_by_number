@@ -61,6 +61,7 @@ def CreatePDF(img, base_colors):
 
         # Draw the filled recangle
         canvas.rect(pos_x, pos_y, color_square_size, color_square_size, fill=True)
+        canvas.drawString(pos_x-(0.3*inch), pos_y, str(num))
     
     # Save pdf to parent directory
     canvas.save()
