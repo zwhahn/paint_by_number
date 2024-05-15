@@ -15,7 +15,7 @@ from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
 '''TAKE PICTURE'''
-TAKING_PICTURE = False
+TAKING_PICTURE = True
 
 if TAKING_PICTURE:
     print("Starting Camera...")
@@ -23,6 +23,9 @@ if TAKING_PICTURE:
     # Start video object, 0 uses first camera available
     vid = cv.VideoCapture(0)
     print("Camera On! Press 'y' to capture an image!")
+
+    cv.namedWindow("video_feed", cv.WND_PROP_FULLSCREEN)
+    cv.setWindowProperty("video_feed", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
 
     # Calculate center of frame for countdown position
     x_center = int(vid.get(cv.CAP_PROP_FRAME_WIDTH)/2)
@@ -50,7 +53,7 @@ if TAKING_PICTURE:
         if cv.waitKey(1) & 0x0FF == ord('q'):
             break
         
-        cv.imshow('frame', frame)  # Display video feed
+        cv.imshow('video_feed', frame)  # Display video feed
 
         # Once the countdown is over, the image is captured and saved to the images folder
         if remaining_time == 0:
@@ -60,6 +63,7 @@ if TAKING_PICTURE:
                
     # Shut down video object
     vid.release()
+    cv.destroyAllWindows()
 
 if not TAKING_PICTURE:
     print("Not taking new picture, using previously loaded one. If this incorrect, check 'TAKING_PICTURE' variable.")
