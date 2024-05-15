@@ -24,6 +24,7 @@ if TAKING_PICTURE:
     vid = cv.VideoCapture(0)
     print("Camera On! Press 'y' to capture an image!")
 
+    # Create fullscreen window for video feed
     cv.namedWindow("video_feed", cv.WND_PROP_FULLSCREEN)
     cv.setWindowProperty("video_feed", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
 
