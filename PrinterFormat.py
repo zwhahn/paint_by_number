@@ -20,7 +20,7 @@ def CreatePDF(img, base_colors):
     for num in range(len(base_colors)):
         color = base_colors[num]
 
-        # Create 3x3 grid
+        # Create 3x3 grid of color squares
         if 0 <= num <= 2:
             center_y = 3.7*inch
             if num == 0:
@@ -61,7 +61,10 @@ def CreatePDF(img, base_colors):
 
         # Draw the filled recangle
         canvas.rect(pos_x, pos_y, color_square_size, color_square_size, fill=True)
-        canvas.drawString(pos_x-(0.3*inch), pos_y, str(num))
+        # Write number next to it
+        canvas.setFont("Helvetica", 16)
+        canvas.setFillColorRGB(0, 0, 0)  # Reset font color to black
+        canvas.drawString(pos_x-(0.24*inch), pos_y+(0.05*inch), str(num + 1) + ".")
     
     # Save pdf to parent directory
     canvas.save()
