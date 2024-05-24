@@ -170,11 +170,26 @@ color_list_lab = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
 	(1.7619641595337825, -0.9567793028630311, 11.8000166591868982),
     (84.19846444703293, 0.004543913948662492, -0.008990380233764306)]
 
-# img = cv.cvtColor(img, cv.COLOR_BGR2YUV)
-def find_closest_color(color, color_list_lab):
-    distances = [np.linalg.norm(np.array(color) - np.array(target)) for target in color_list_lab]
-    closest_color = color_list_lab[np.argmin(distances)]
-    return closest_color
+def find_most_similar_color(target_color, color_list):
+    # Convert the target color to a numpy array
+    target_color = np.array(target_color)
+
+    min_distance = float('inf')
+    most_similar_color = None
+
+    for color in color_list:
+        # Convert the color to a numpy array
+        color = np.array(color)
+
+        # Calculate the Euclidean distance between the target color and the color
+        distance = np.sqrt(np.sum((target_color - color) ** 2))
+
+        # If the distance is smaller than the current minimum distance, update the minimum distance and the most similar color
+        if distance < min_distance:
+            min_distance = distance
+            most_similar_color = color
+
+    return most_similar_color
 
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img_lab,(7,7), sigmaX=30, sigmaY=30)
@@ -195,11 +210,22 @@ criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop c
 color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
-base_colors = [find_closest_color(color, color_list_lab) for color in base_colors]
-base_colors = np.uint8(base_colors)  # BGR values of the final clusters
+base_colors = [find_most_similar_color(color, color_list_lab) for color in base_colors]
+base_colors = np.uint8(base_colors)  # LAB values of the final clusters
 img_simplified = base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
 img_simplified = img_simplified.reshape((img.shape))
-img_simplified = cv.cvtColor(img_simplified, cv.COLOR_Lab2BGR)
+
+def lab_to_bgr(lab_color):
+    # Convert the LAB color to a 2D array
+    lab_color_2d = np.uint8([[lab_color]])
+
+    # Convert the LAB color to BGR
+    bgr_color = cv.cvtColor(lab_color_2d, cv.COLOR_LAB2BGR)
+
+    return bgr_color[0][0]
+
+base_colors = [lab_to_bgr(lab_color) for lab_color in base_colors]
+img_simplified = cv.cvtColor(img_simplified, cv.COLOR_Lab2BGR) # Convert from LAB to BGR
 
 '''COLOR MASKING'''
 # For each base_color, calculate max and min values to use as mask 
