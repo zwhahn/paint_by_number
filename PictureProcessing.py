@@ -15,7 +15,7 @@ from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
 '''TAKE PICTURE'''
-TAKING_PICTURE = True
+TAKING_PICTURE = False
 
 if TAKING_PICTURE:
     print("Starting Camera...")
@@ -87,11 +87,11 @@ img = cv.imread("./images/capture.png")  # The video captured image
 
 '''IMAGE-TO-IMAGE GENERATION'''
 # Set to False if you don't want AI generated image
-USE_AI = False
-if not USE_AI:
-    print("AI generation skipped. If this is incorrect, check 'USE_AI' variable in the script.")
+USING_AI = False
+if not USING_AI:
+    print("AI generation skipped. If this is incorrect, check 'USING_AI' variable in the script.")
 
-if USE_AI:
+if USING_AI:
     print("AI generation beginning...")
     # Following example from Stability AI: https://platform.stability.ai/docs/features/image-to-image#Python
 
@@ -122,9 +122,9 @@ if USE_AI:
 
     # Generation Parameters
     answers = stability_api.generate(
-        prompt="In the style of vincent van gogh's Sunflowers, beautiful paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible", 
+        prompt="Portrait in the style of vincent van gogh's Sunflowers, beautiful paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible", 
         init_image=pil_img,  # Initial image for transformation
-        start_schedule=0.75,  # Strength of prompt in relation to original image
+        start_schedule=0.55,  # Strength of prompt in relation to original image
         steps=30,  # Number of intereference steps. Default is 30
         cfg_scale=7.0,  # Influences how strongly generation is guided to match prompt- higher values increase strength in which it tries to match prompt. Default 7.0
         width=512,
@@ -161,8 +161,8 @@ if USE_AI:
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
 # Reshape the image to be a 2D array with 3 channels. 
-# The value -1 the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
-# each pixel is a row and each column represents a column (R, G, B).
+# The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
+# each pixel is a row and each column represents a color (R, G, B).
 # This allows the k-means cluster algorithm to cluster similar colors together.  
 img_reshape = img_blur.reshape((-1, 3))
 
@@ -177,7 +177,7 @@ color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
-img_simplified = base_colors[label.flatten()]  # Replace each picel with its corresponding base color
+img_simplified = base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
 img_simplified = img_simplified.reshape((img.shape))
 
 
@@ -372,7 +372,7 @@ plt.imshow(cv.cvtColor(final_image, cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Final Paint-by-Number")
 
-# plt.show()  # display matplotlib figures 
+plt.show()  # display matplotlib figures 
 
 
 '''IMSHOW'''
