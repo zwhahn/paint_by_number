@@ -84,7 +84,6 @@ start_time = time.time()
 # img = cv.imread("./images/mona_lisa.jpg")
 img = cv.imread("./images/capture.png")  # The video captured image
 
-
 '''IMAGE-TO-IMAGE GENERATION'''
 # Set to False if you don't want AI generated image
 USING_AI = False
@@ -157,6 +156,23 @@ if USING_AI:
 
 
 '''COLOR QUANTIZATION'''
+# List of BGR values from croyola 12 pack
+color_list = [(10, 10, 130),
+	(5, 0, 180),
+	(1, 54, 216),
+	(1, 174, 200),
+	(4, 120, 3),
+	(213, 149, 1),
+	(84, 15, 0),
+	(3, 5, 66),
+	(2, 7, 6),
+    (210, 210, 210)]
+
+def find_closest_color(color, color_list):
+    distances = [np.linalg.norm(np.array(color) - np.array(target)) for target in color_list]
+    closest_color = color_list[np.argmin(distances)]
+    return closest_color
+
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
 
@@ -176,10 +192,10 @@ criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop c
 color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
+base_colors = [find_closest_color(color, color_list) for color in base_colors]
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
 img_simplified = base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
 img_simplified = img_simplified.reshape((img.shape))
-
 
 '''COLOR MASKING'''
 # For each base_color, calculate max and min values to use as mask 
@@ -391,6 +407,7 @@ cv.waitKey(0)  # keep images open until any key is pressed
 
 '''GENERATE PDF'''
 # Convert numpy array to .jpg format
+final_image = cv.cvtColor(final_image, cv.COLOR_BGR2RGB)
 final_image = Image.fromarray(final_image)
 final_image.save("./images/final_image.jpg")
 CreatePDF("./images/final_image.jpg", base_colors)
