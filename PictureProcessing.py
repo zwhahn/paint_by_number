@@ -84,6 +84,8 @@ start_time = time.time()
 # img = cv.imread("./images/mona_lisa.jpg")
 img = cv.imread("./images/capture.png")  # The video captured image
 
+img_lab = cv.cvtColor(img, cv.COLOR_BGR2Lab)
+
 '''IMAGE-TO-IMAGE GENERATION'''
 # Set to False if you don't want AI generated image
 USING_AI = False
@@ -156,25 +158,26 @@ if USING_AI:
 
 
 '''COLOR QUANTIZATION'''
-# List of BGR values from croyola 12 pack
-color_list = [(10, 10, 130),
-	(5, 0, 180),
-	(1, 54, 216),
-	(1, 174, 200),
-	(4, 120, 3),
-	(213, 149, 1),
-	(84, 15, 0),
-	(3, 5, 66),
-	(2, 7, 6),
-    (210, 210, 210)]
+# List of LAB values from croyola 12 pack
+color_list_lab = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
+	(37.32462776246022, 61.73353636015208, 49.70761097914498),
+	(48.56034325016407, 60.801423247291595, 260.419969209528926),
+	(71.25097323326531, -4.660282552567285, 73.53468745541643),
+	(43.44990229796805, -48.926808323815216, 46.76834532999551),
+	(58.325844779003816, -9.83338602909467, -41.81839089809676),
+	(8.838401266601803, 25.494537383586938, -42.59741211318631),
+	(11.087927325489154, 28.22859583509954, 16.116404226973568),
+	(1.7619641595337825, -0.9567793028630311, 11.8000166591868982),
+    (84.19846444703293, 0.004543913948662492, -0.008990380233764306)]
 
-def find_closest_color(color, color_list):
-    distances = [np.linalg.norm(np.array(color) - np.array(target)) for target in color_list]
-    closest_color = color_list[np.argmin(distances)]
+# img = cv.cvtColor(img, cv.COLOR_BGR2YUV)
+def find_closest_color(color, color_list_lab):
+    distances = [np.linalg.norm(np.array(color) - np.array(target)) for target in color_list_lab]
+    closest_color = color_list_lab[np.argmin(distances)]
     return closest_color
 
 # Blur image to reduce noise for improved edge detection
-img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
+img_blur = cv.GaussianBlur(img_lab,(7,7), sigmaX=30, sigmaY=30)
 
 # Reshape the image to be a 2D array with 3 channels. 
 # The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
@@ -192,10 +195,11 @@ criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop c
 color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
-base_colors = [find_closest_color(color, color_list) for color in base_colors]
+base_colors = [find_closest_color(color, color_list_lab) for color in base_colors]
 base_colors = np.uint8(base_colors)  # BGR values of the final clusters
 img_simplified = base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
 img_simplified = img_simplified.reshape((img.shape))
+img_simplified = cv.cvtColor(img_simplified, cv.COLOR_Lab2BGR)
 
 '''COLOR MASKING'''
 # For each base_color, calculate max and min values to use as mask 
