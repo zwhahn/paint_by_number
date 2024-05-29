@@ -86,6 +86,19 @@ img = cv.imread("./images/capture.png")  # The video captured image
 # Convert image to CIELAB color space for processing
 img_lab = cv.cvtColor(img, cv.COLOR_BGR2Lab)
 
+# Adjust L, a, and b channel values using Contrast Limited Adaptive Histogram Equalization (CLAHE)
+# The L channel represent lightness, a channel represents color spectrum from green to red, 
+# and b channel represent color spectrum from blue to yellow
+l, a, b = cv.split(img_lab)
+clahe_l = cv.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
+clahe_a = cv.createCLAHE(clipLimit=1.0, tileGridSize=(3,3))
+clahe_b = cv.createCLAHE(clipLimit=2.0, tileGridSize=(3,3))
+l = clahe_l.apply(l)
+a = clahe_a.apply(a)
+b = clahe_b.apply(b)
+img_clahe = cv.merge((l,a,b))
+img_clahe = cv.cvtColor(img_clahe, cv.COLOR_LAB2BGR)
+
 '''IMAGE-TO-IMAGE GENERATION'''
 # Set to False if you don't want AI generated image
 USING_AI = False
@@ -209,26 +222,15 @@ def find_most_similar_color(target_color, color_list):
     return most_similar_color
 
 # Blur image to reduce noise for improved edge detection
-img_blur = cv.GaussianBlur(img_lab,(7,7), sigmaX=30, sigmaY=30)
+img_blur = cv.GaussianBlur(img_clahe,(7,7), sigmaX=30, sigmaY=30)
 
-# Adkjust L, a, and b channel values using Contrast Limited Adaptive Histogram Equalization (CLAHE)
-# The L channel represent lightness, a channel represents color spectrum from green to red, 
-# and b channel represent color spectrum from blue to yellow
-l, a, b = cv.split(img_blur)
-clahe_l = cv.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
-clahe_a = cv.createCLAHE(clipLimit=1.0, tileGridSize=(3,3))
-clahe_b = cv.createCLAHE(clipLimit=2.0, tileGridSize=(3,3))
-l = clahe_l.apply(l)
-a = clahe_a.apply(a)
-b = clahe_b.apply(b)
-img_blur_clahe = cv.merge((l,a,b))
-img_blur_clahe = cv.cvtColor(img_blur_clahe, cv.COLOR_LAB2BGR)
+
 
 # Reshape the image to be a 2D array with 3 channels. 
 # The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
 # each pixel is a row and each column represents a color (R, G, B).
 # This allows the k-means cluster algorithm to cluster similar colors together.  
-img_reshape = img_blur_clahe.reshape((-1, 3))
+img_reshape = img_blur.reshape((-1, 3))
 
 # Convert to float32 for floating-point calculations
 img_reshape = np.float32(img_reshape)
@@ -433,9 +435,9 @@ plt.title("Original Image")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
-plt.imshow(cv.cvtColor(img_blur_clahe, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_clahe, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title(f"Blurred Image")
+plt.title(f"CLAHE Image")
 
 # Add subplot in third position
 fig.add_subplot(rows, columns, 3)
