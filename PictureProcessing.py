@@ -172,6 +172,7 @@ if USING_AI:
 
 '''COLOR QUANTIZATION'''
 # List of LAB values from croyola 12 pack
+    # L [0, 100], A [-128, 127], B [-128, 127]
 color_list_LAB = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
                   (37.32462776246022, 61.73353636015208, 49.70761097914498),
                   (48.56034325016407, 60.801423247291595, 260.419969209528926),
@@ -182,6 +183,20 @@ color_list_LAB = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
                   (11.087927325489154, 28.22859583509954, 16.116404226973568),
                   (1.7619641595337825, -0.9567793028630311, 11.8000166591868982),
                   (84.19846444703293, 0.004543913948662492, -0.008990380233764306)]
+
+# Convert from the typical LAB color range to the [0,255] range OpenCV uses
+def convert_LAB_to_opencv(color_list_LAB):
+    color_list_LAB_opencv = []
+    for color in color_list_LAB:
+        L, a, b = color
+        # Scale the L channel from [0, 100] to [0, 255]
+        L = L * 255 / 100
+        # Scale the a and b channels from [-128, 127] to [0, 255]
+        a = (a + 128) * 255 / (127 + 128)
+        b = (b + 128) * 255 / (127 + 128)
+        color_list_LAB_opencv.append((L, a, b))
+    return color_list_LAB_opencv
+color_list_LAB = convert_LAB_to_opencv(color_list_LAB)
 
 # List of BGR values from croyola 12 pack
 color_list_BGR = [(10, 10, 130),
@@ -225,9 +240,9 @@ def find_most_similar_color(target_color, color_list):
 img_blur = cv.GaussianBlur(img_clahe,(7,7), sigmaX=30, sigmaY=30)
 
 # Reshape the image to be a 2D array with 3 channels. 
-# The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
-# each pixel is a row and each column represents a color (R, G, B).
-# This allows the k-means cluster algorithm to cluster similar colors together.  
+    # The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
+    # each pixel is a row and each column represents a color (R, G, B).
+    # This allows the k-means cluster algorithm to cluster similar colors together.  
 img_reshape = img_blur.reshape((-1, 3))
 
 # Convert to float32 for floating-point calculations
@@ -236,7 +251,7 @@ img_reshape = np.float32(img_reshape)
 # Define criteria, number of clusters(K), and apply kmeans()
     # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
     # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
-criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 0.2)  # stop criteria, epsilon, max iterations
+criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 1000, 0.11)  # stop criteria, epsilon, max iterations
 color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
@@ -258,7 +273,7 @@ def LAB_to_bgr(LAB_color):
 
     return bgr_color[0][0]
 
-base_colors = [LAB_to_bgr(LAB_color) for LAB_color in base_colors]
+base_colors = [LAB_to_bgr(LAB_color) for LAB_color in base_colors] # convert base_colors to BGR color masking operations
 print("base colors:", base_colors)
 
 
