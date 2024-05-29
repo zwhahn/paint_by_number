@@ -84,12 +84,12 @@ start_time = time.time()
 img = cv.imread("./images/capture.png")  # The video captured image
 
 # Convert image to CIELAB color space for processing
-img_lab = cv.cvtColor(img, cv.COLOR_BGR2Lab)
+img_LAB = cv.cvtColor(img, cv.COLOR_BGR2Lab)
 
 # Adjust L, a, and b channel values using Contrast Limited Adaptive Histogram Equalization (CLAHE)
 # The L channel represent lightness, a channel represents color spectrum from green to red, 
 # and b channel represent color spectrum from blue to yellow
-l, a, b = cv.split(img_lab)
+l, a, b = cv.split(img_LAB)
 clahe_l = cv.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
 clahe_a = cv.createCLAHE(clipLimit=1.0, tileGridSize=(3,3))
 clahe_b = cv.createCLAHE(clipLimit=2.0, tileGridSize=(3,3))
@@ -97,7 +97,7 @@ l = clahe_l.apply(l)
 a = clahe_a.apply(a)
 b = clahe_b.apply(b)
 img_clahe = cv.merge((l,a,b))
-img_clahe = cv.cvtColor(img_clahe, cv.COLOR_LAB2BGR)
+# img_clahe = cv.cvtColor(img_clahe, cv.COLOR_LAB2BGR)
 
 '''IMAGE-TO-IMAGE GENERATION'''
 # Set to False if you don't want AI generated image
@@ -172,7 +172,7 @@ if USING_AI:
 
 '''COLOR QUANTIZATION'''
 # List of LAB values from croyola 12 pack
-color_list_lab = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
+color_list_LAB = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
                   (37.32462776246022, 61.73353636015208, 49.70761097914498),
                   (48.56034325016407, 60.801423247291595, 260.419969209528926),
                   (71.25097323326531, -4.660282552567285, 73.53468745541643),
@@ -224,8 +224,6 @@ def find_most_similar_color(target_color, color_list):
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img_clahe,(7,7), sigmaX=30, sigmaY=30)
 
-
-
 # Reshape the image to be a 2D array with 3 channels. 
 # The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
 # each pixel is a row and each column represents a color (R, G, B).
@@ -238,28 +236,31 @@ img_reshape = np.float32(img_reshape)
 # Define criteria, number of clusters(K), and apply kmeans()
     # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
     # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
-criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
+criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 0.2)  # stop criteria, epsilon, max iterations
 color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 print("base colors:", base_colors)
 
-base_colors = [find_most_similar_color(color, color_list_BGR) for color in base_colors]
-base_colors = np.uint8(base_colors)  # LAB values of the final clusters
+base_colors = [find_most_similar_color(color, color_list_LAB) for color in base_colors]
+# base_colors = [find_most_similar_color(color, color_list_BGR) for color in base_colors]
+base_colors = np.uint8(base_colors)  # Values of the final clusters
 img_simplified = base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
 img_simplified = img_simplified.reshape((img.shape))
+img_simplified = cv.cvtColor(img_simplified, cv.COLOR_LAB2BGR)
 
-def lab_to_bgr(lab_color):
+def LAB_to_bgr(LAB_color):
     # Convert the LAB color to a 2D array
-    lab_color_2d = np.uint8([[lab_color]])
+    LAB_color_2d = np.uint8([[LAB_color]])
 
     # Convert the LAB color to BGR
-    bgr_color = cv.cvtColor(lab_color_2d, cv.COLOR_LAB2BGR)
+    bgr_color = cv.cvtColor(LAB_color_2d, cv.COLOR_LAB2BGR)
 
     return bgr_color[0][0]
 
-# base_colors = [lab_to_bgr(lab_color) for lab_color in base_colors]
-# img_simplified = cv.cvtColor(img_simplified, cv.COLOR_Lab2BGR) # Convert from LAB to BGR
+base_colors = [LAB_to_bgr(LAB_color) for LAB_color in base_colors]
+print("base colors:", base_colors)
+
 
 '''COLOR MASKING'''
 # For each base_color, calculate max and min values to use as mask 
@@ -435,7 +436,7 @@ plt.title("Original Image")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
-plt.imshow(cv.cvtColor(img_clahe, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_clahe, cv.COLOR_LAB2RGB))
 plt.axis('off')
 plt.title(f"CLAHE Image")
 
