@@ -211,11 +211,17 @@ def find_most_similar_color(target_color, color_list):
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img_lab,(7,7), sigmaX=30, sigmaY=30)
 
-# Increase brightness
-l_channel, a, b = cv.split(img_blur)
-clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-cl = clahe.apply(l_channel)
-img_blur_clahe = cv.merge((cl,a,b))
+# Adkjust L, a, and b channel values using Contrast Limited Adaptive Histogram Equalization (CLAHE)
+# The L channel represent lightness, a channel represents color spectrum from green to red, 
+# and b channel represent color spectrum from blue to yellow
+l, a, b = cv.split(img_blur)
+clahe_l = cv.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
+clahe_a = cv.createCLAHE(clipLimit=1.0, tileGridSize=(3,3))
+clahe_b = cv.createCLAHE(clipLimit=2.0, tileGridSize=(3,3))
+l = clahe_l.apply(l)
+a = clahe_a.apply(a)
+b = clahe_b.apply(b)
+img_blur_clahe = cv.merge((l,a,b))
 img_blur_clahe = cv.cvtColor(img_blur_clahe, cv.COLOR_LAB2BGR)
 
 # Reshape the image to be a 2D array with 3 channels. 
