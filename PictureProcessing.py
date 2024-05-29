@@ -9,7 +9,6 @@ from PrinterFormat import CreatePDF
 import io
 import os
 import warnings
-
 from PIL import Image
 from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
@@ -84,6 +83,7 @@ start_time = time.time()
 # img = cv.imread("./images/mona_lisa.jpg")
 img = cv.imread("./images/capture.png")  # The video captured image
 
+# Convert image to CIELAB color space for processing
 img_lab = cv.cvtColor(img, cv.COLOR_BGR2Lab)
 
 '''IMAGE-TO-IMAGE GENERATION'''
@@ -171,21 +171,21 @@ color_list_lab = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
                   (84.19846444703293, 0.004543913948662492, -0.008990380233764306)]
 
 # List of BGR values from croyola 12 pack
-color_list = [(10, 10, 130),
-              (5, 0, 180),
-              (1, 54, 216),
-              (1, 174, 200),
-              (4, 120, 3),
-              (130, 10, 10),
-              (180, 0, 5),
-              (216, 54, 1),
-              (200, 174, 1),
-              (3, 120, 4),
-              (1, 149, 213),
-              (0, 15, 84),
-              (66, 5, 3),
-              (6, 7, 2),
-              (210, 210, 210)]
+color_list_BGR = [(10, 10, 130),
+                  (5, 0, 180),
+                  (1, 54, 216),
+                  (1, 174, 200),
+                  (4, 120, 3),
+                  (130, 10, 10),
+                  (180, 0, 5),
+                  (216, 54, 1),
+                  (200, 174, 1),
+                  (3, 120, 4),
+                  (1, 149, 213),
+                  (0, 15, 84),
+                  (66, 5, 3),
+                  (6, 7, 2),
+                  (210, 210, 210)]
 
 def find_most_similar_color(target_color, color_list):
     # Convert the target color to a numpy array
@@ -211,11 +211,18 @@ def find_most_similar_color(target_color, color_list):
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img_lab,(7,7), sigmaX=30, sigmaY=30)
 
+# Increase brightness
+l_channel, a, b = cv.split(img_blur)
+clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+cl = clahe.apply(l_channel)
+img_blur_clahe = cv.merge((cl,a,b))
+img_blur_clahe = cv.cvtColor(img_blur_clahe, cv.COLOR_LAB2BGR)
+
 # Reshape the image to be a 2D array with 3 channels. 
 # The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
 # each pixel is a row and each column represents a color (R, G, B).
 # This allows the k-means cluster algorithm to cluster similar colors together.  
-img_reshape = img_blur.reshape((-1, 3))
+img_reshape = img_blur_clahe.reshape((-1, 3))
 
 # Convert to float32 for floating-point calculations
 img_reshape = np.float32(img_reshape)
@@ -227,7 +234,9 @@ criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop c
 color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
-base_colors = [find_most_similar_color(color, color_list_lab) for color in base_colors]
+print("base colors:", base_colors)
+
+base_colors = [find_most_similar_color(color, color_list_BGR) for color in base_colors]
 base_colors = np.uint8(base_colors)  # LAB values of the final clusters
 img_simplified = base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
 img_simplified = img_simplified.reshape((img.shape))
@@ -241,8 +250,8 @@ def lab_to_bgr(lab_color):
 
     return bgr_color[0][0]
 
-base_colors = [lab_to_bgr(lab_color) for lab_color in base_colors]
-img_simplified = cv.cvtColor(img_simplified, cv.COLOR_Lab2BGR) # Convert from LAB to BGR
+# base_colors = [lab_to_bgr(lab_color) for lab_color in base_colors]
+# img_simplified = cv.cvtColor(img_simplified, cv.COLOR_Lab2BGR) # Convert from LAB to BGR
 
 '''COLOR MASKING'''
 # For each base_color, calculate max and min values to use as mask 
