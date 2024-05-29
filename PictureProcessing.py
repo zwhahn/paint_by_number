@@ -173,7 +173,7 @@ color_list_lab = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
 # List of BGR values from croyola 12 pack
 color_list_BGR = [(10, 10, 130),
                   (5, 0, 180),
-                  (1, 54, 216),
+                  (1, 54, 216),         
                   (1, 174, 200),
                   (4, 120, 3),
                   (130, 10, 10),
@@ -255,7 +255,7 @@ def lab_to_bgr(lab_color):
 
 '''COLOR MASKING'''
 # For each base_color, calculate max and min values to use as mask 
-tol = 5  # tolerance 
+tol = 0  # tolerance 
 bgr_color_limit_dict = {}
 for i, bgr_color in enumerate(base_colors):
     b_val = base_colors[i][0]
@@ -427,15 +427,15 @@ plt.title("Original Image")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
-plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_blur_clahe, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title(f"Image with Grouped Colors, Color Quantity: {color_quantity}")
+plt.title(f"Blurred Image")
 
 # Add subplot in third position
 fig.add_subplot(rows, columns, 3)
-plt.imshow(cv.cvtColor(img_mask_dict[0], cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Example of Image Mask")
+plt.title(f"Image with Grouped Colors, Color Quantity: {color_quantity}")
 
 
 # Add subplot in fourth position
