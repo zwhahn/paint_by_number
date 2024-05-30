@@ -252,7 +252,7 @@ def find_similar_color(base_colors, color_list):
             if distance < min_distance:
                 min_distance = distance
                 most_similar_color = target_color
-                print("most similar", most_similar_color)
+                # print("most similar", most_similar_color)
         new_base_colors.append(most_similar_color)
         color_list = [color for color in color_list if color not in most_similar_color]
 
@@ -282,9 +282,12 @@ color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 print("base colors:", base_colors)
+print("base colors[0]:", type(base_colors[0]))
 
 base_colors = [find_similar_color(base_colors, color_list_LAB)]
+base_colors = np.array([np.array(base_color) for base_color in base_colors])[0]
 print("NEW base colors:", base_colors)
+print("NEW base colors[0]:", type(base_colors[0]))
 # base_colors = [find_most_similar_color(color, color_list_BGR) for color in base_colors]
 base_colors = np.uint8(base_colors)  # Values of the final clusters
 img_simplified = base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
