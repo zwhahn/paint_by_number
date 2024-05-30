@@ -215,14 +215,14 @@ color_list_BGR = [(10, 10, 130),
                   (6, 7, 2),
                   (210, 210, 210)]
 
-def find_most_similar_color(target_color, color_list):
+def find_most_similar_color(base_color, color_palette):
     # Convert the target color to a numpy array
-    target_color = np.array(target_color)
+    target_color = np.array(base_color)
 
     min_distance = float('inf')
     most_similar_color = None
 
-    for color in color_list:
+    for color in color_palette:
         # Convert the color to a numpy array
         color = np.array(color)
 
@@ -235,6 +235,32 @@ def find_most_similar_color(target_color, color_list):
             most_similar_color = color
 
     return most_similar_color
+
+def find_similar_color(base_colors, color_list):
+    new_base_colors = []
+    for base_color in base_colors:
+        min_distance = float('inf')
+        for target_color in color_list:
+            # Convert the color to a numpy array
+            base_color = np.array(base_color)
+            target_color = np.array(target_color)
+
+            # Calculate the Euclidean distance between the target color and the color
+            distance = np.sqrt(np.sum((target_color - base_color) ** 2))
+
+            # If the distance is smaller than the current minimum distance, update the minimum distance and the most similar color
+            if distance < min_distance:
+                min_distance = distance
+                most_similar_color = target_color
+                print("most similar", most_similar_color)
+        new_base_colors.append(most_similar_color)
+        color_list = [color for color in color_list if color not in most_similar_color]
+
+
+    
+    return new_base_colors
+
+
 
 # Blur image to reduce noise for improved edge detection
 img_blur = cv.GaussianBlur(img_clahe,(7,7), sigmaX=30, sigmaY=30)
@@ -251,13 +277,14 @@ img_reshape = np.float32(img_reshape)
 # Define criteria, number of clusters(K), and apply kmeans()
     # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
     # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
-criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 1000, 0.11)  # stop criteria, epsilon, max iterations
+criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1)  # stop criteria, epsilon, max iterations
 color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
 print("base colors:", base_colors)
 
-base_colors = [find_most_similar_color(color, color_list_LAB) for color in base_colors]
+base_colors = [find_similar_color(base_colors, color_list_LAB)]
+print("NEW base colors:", base_colors)
 # base_colors = [find_most_similar_color(color, color_list_BGR) for color in base_colors]
 base_colors = np.uint8(base_colors)  # Values of the final clusters
 img_simplified = base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
