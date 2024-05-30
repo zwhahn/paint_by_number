@@ -3,19 +3,19 @@ import numpy as np
 from matplotlib import pyplot as plt 
 import imutils
 import time
-import math
+from PrinterFormat import CreatePDF
 
 # AI Imports
 import io
 import os
 import warnings
-
 from PIL import Image
 from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
+
 '''TAKE PICTURE'''
-TAKING_PICTURE = True
+TAKING_PICTURE = False
 
 if TAKING_PICTURE:
     print("Starting Camera...")
@@ -23,6 +23,10 @@ if TAKING_PICTURE:
     # Start video object, 0 uses first camera available
     vid = cv.VideoCapture(0)
     print("Camera On! Press 'y' to capture an image!")
+
+    # Create fullscreen window for video feed
+    cv.namedWindow("video_feed", cv.WND_PROP_FULLSCREEN)
+    cv.setWindowProperty("video_feed", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
 
     # Calculate center of frame for countdown position
     x_center = int(vid.get(cv.CAP_PROP_FRAME_WIDTH)/2)
@@ -50,7 +54,7 @@ if TAKING_PICTURE:
         if cv.waitKey(1) & 0x0FF == ord('q'):
             break
         
-        cv.imshow('frame', frame)  # Display video feed
+        cv.imshow('video_feed', frame)  # Display video feed
 
         # Once the countdown is over, the image is captured and saved to the images folder
         if remaining_time == 0:
@@ -60,6 +64,7 @@ if TAKING_PICTURE:
                
     # Shut down video object
     vid.release()
+    cv.destroyAllWindows()
 
 if not TAKING_PICTURE:
     print("Not taking new picture, using previously loaded one. If this incorrect, check 'TAKING_PICTURE' variable.")
@@ -80,13 +85,13 @@ start_time = time.time()
 img = cv.imread("./images/capture.png")  # The video captured image
 
 
-'''IMAGE-TO-IMAGE GENERATION'''
+'''AI IMAGE-TO-IMAGE GENERATION'''
 # Set to False if you don't want AI generated image
-USE_AI = False
-if not USE_AI:
-    print("AI generation skipped. If this is incorrect, check 'USE_AI' variable in the script.")
+USING_AI = False
+if not USING_AI:
+    print("AI generation skipped. If this is incorrect, check 'USING_AI' variable in the script.")
 
-if USE_AI:
+if USING_AI:
     print("AI generation beginning...")
     # Following example from Stability AI: https://platform.stability.ai/docs/features/image-to-image#Python
 
@@ -117,9 +122,9 @@ if USE_AI:
 
     # Generation Parameters
     answers = stability_api.generate(
-        prompt="In the style of vincent van gogh's Sunflowers, beautiful paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible", 
+        prompt="Portrait in the style of vincent van gogh's Sunflowers, beautiful paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible", 
         init_image=pil_img,  # Initial image for transformation
-        start_schedule=0.75,  # Strength of prompt in relation to original image
+        start_schedule=0.55,  # Strength of prompt in relation to original image
         steps=30,  # Number of intereference steps. Default is 30
         cfg_scale=7.0,  # Influences how strongly generation is guided to match prompt- higher values increase strength in which it tries to match prompt. Default 7.0
         width=512,
@@ -151,40 +156,143 @@ if USE_AI:
         img = cv.cvtColor(img_generated, cv.COLOR_RGB2BGR)
 
 
-'''COLOR QUANTIZATION'''
+'''IMAGE PREPROCESSING'''
+# Convert image to CIELAB color space for processing
+img_LAB = cv.cvtColor(img, cv.COLOR_BGR2Lab)
+
+# It was found that the increasing lightness resulted in an image with more small sections which is undesirable
+# This section is being left in for possible future improvement
+# # Adjust L, a, and b channel values using Contrast Limited Adaptive Histogram Equalization (CLAHE)
+# # The L channel represent lightness, a channel represents color spectrum from green to red, 
+# # and b channel represent color spectrum from blue to yellow
+# l, a, b = cv.split(img_LAB)
+# clahe_l = cv.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
+# clahe_a = cv.createCLAHE(clipLimit=1.0, tileGridSize=(3,3))
+# clahe_b = cv.createCLAHE(clipLimit=2.0, tileGridSize=(3,3))
+# l = clahe_l.apply(l)
+# a = clahe_a.apply(a)
+# b = clahe_b.apply(b)
+# img_LAB = cv.merge((l,a,b))
+
 # Blur image to reduce noise for improved edge detection
-img_blur = cv.GaussianBlur(img,(7,7), sigmaX=30, sigmaY=30)
+img_blur = cv.GaussianBlur(img_LAB,(7,7), sigmaX=30, sigmaY=30)
 
 # Reshape the image to be a 2D array with 3 channels. 
-# The value -1 the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
-# each pixel is a row and each column represents a column (R, G, B).
-# This allows the k-means cluster algorithm to cluster similar colors together.  
+    # The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
+    # each pixel is a row and each column represents a color (L, A, B).
+    # This allows the k-means cluster algorithm to cluster similar colors together.  
 img_reshape = img_blur.reshape((-1, 3))
 
 # Convert to float32 for floating-point calculations
 img_reshape = np.float32(img_reshape)
 
+
+'''COLOR QUANTIZATION'''
 # Define criteria, number of clusters(K), and apply kmeans()
     # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
     # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
-criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)  # stop criteria, epsilon, max iterations
+criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1)  # stop criteria, epsilon, max iterations
 color_quantity = 9 # number of clusters (or colors)
 ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
-base_colors = np.uint8(base_colors)  # BGR values of the final clusters
-# print(base_colors)
-img_simplified = base_colors[label.flatten()]  # Replace each picel with its corresponding base color
+
+'''FIND UNIQUE BASE COLORS'''
+# List of LAB values from croyola 12 pack
+    # L [0, 100], A [-128, 127], B [-128, 127]
+color_list_LAB = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
+                  (37.32462776246022, 61.73353636015208, 49.70761097914498),
+                  (48.56034325016407, 60.801423247291595, 260.419969209528926),
+                  (71.25097323326531, -4.660282552567285, 73.53468745541643),
+                  (43.44990229796805, -48.926808323815216, 46.76834532999551),
+                  (58.325844779003816, -9.83338602909467, -41.81839089809676),
+                  (8.838401266601803, 25.494537383586938, -42.59741211318631),
+                  (11.087927325489154, 28.22859583509954, 16.116404226973568),
+                  (1.7619641595337825, -0.9567793028630311, 11.8000166591868982),
+                  (84.19846444703293, 0.004543913948662492, -0.008990380233764306)]
+
+# List of BGR values from croyola 12 pack
+color_list_BGR = [(10, 10, 130),
+                  (5, 0, 180),
+                  (1, 54, 216),         
+                  (1, 174, 200),
+                  (4, 120, 3),
+                  (130, 10, 10),
+                  (180, 0, 5),
+                  (216, 54, 1),
+                  (200, 174, 1),
+                  (3, 120, 4),
+                  (1, 149, 213),
+                  (0, 15, 84),
+                  (66, 5, 3),
+                  (6, 7, 2),
+                  (210, 210, 210)]
+
+# Convert from the typical LAB color range to the [0,255] range OpenCV uses
+def convert_LAB_to_opencv(color_list_LAB):
+    color_list_LAB_opencv = []
+    for color in color_list_LAB:
+        L, a, b = color
+        # Scale the L channel from [0, 100] to [0, 255]
+        L = L * 255 / 100
+        # Scale the a and b channels from [-128, 127] to [0, 255]
+        a = (a + 128)
+        b = (b + 128)
+        color_list_LAB_opencv.append((L, a, b))
+    return color_list_LAB_opencv
+color_list_LAB_opencv = convert_LAB_to_opencv(color_list_LAB)
+
+def find_unique_base_colors(base_colors, color_list):
+    unique_base_colors = []
+    for base_color in base_colors:
+        # Reset min_distance for each base_color
+        min_distance = float('inf')
+        for unique_color in color_list:
+            # Convert the color to a numpy array
+            base_color = np.array(base_color)
+            unique_color = np.array(unique_color)
+
+            # Calculate the Euclidean distance between the target color and the color
+            distance = np.sqrt(np.sum((unique_color - base_color) ** 2))
+
+            # If the distance is smaller than the current minimum distance, update the minimum distance and the most similar color
+            if distance < min_distance:
+                min_distance = distance
+                most_similar_color = unique_color
+                # print("most similar", most_similar_color)
+        unique_base_colors.append(most_similar_color)
+        # Remove the color that was just chosen as the most_similar_color
+        color_list = [color for color in color_list if color not in most_similar_color] 
+    
+    return unique_base_colors
+
+unique_base_colors = [find_unique_base_colors(base_colors, color_list_LAB_opencv)]
+unique_base_colors = np.array([np.array(base_color) for base_color in unique_base_colors])[0]  # convert to numpy array
+unique_base_colors = np.uint8(unique_base_colors) 
+img_simplified = unique_base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
 img_simplified = img_simplified.reshape((img.shape))
+img_simplified = cv.cvtColor(img_simplified, cv.COLOR_LAB2BGR) 
+
+def LAB_to_BGR(LAB_color):
+    # Convert the LAB color to a 2D array
+    LAB_color_2d = np.uint8([[LAB_color]])
+
+    # Convert the LAB color to BGR
+    bgr_color = cv.cvtColor(LAB_color_2d, cv.COLOR_LAB2BGR)
+
+    return bgr_color[0][0]
+unique_base_colors = [LAB_to_BGR(LAB_color) for LAB_color in unique_base_colors]  # convert unique_base_colors to BGR for color masking operations
+
+unique_base_colors = np.array([np.array(base_color) for base_color in unique_base_colors])
 
 
 '''COLOR MASKING'''
 # For each base_color, calculate max and min values to use as mask 
-tol = 5  # tolerance 
+tol = 0  # tolerance 
 bgr_color_limit_dict = {}
-for i, bgr_color in enumerate(base_colors):
-    b_val = base_colors[i][0]
-    g_val = base_colors[i][1]
-    r_val = base_colors[i][2]
+for i, bgr_color in enumerate(unique_base_colors):
+    b_val = unique_base_colors[i][0]
+    g_val = unique_base_colors[i][1]
+    r_val = unique_base_colors[i][2]
     bgr_color_limit_dict[i] = np.array([b_val - tol, g_val - tol, r_val - tol]), np.array([b_val + tol, g_val + tol, r_val + tol])
 
 # Create masks
@@ -330,11 +438,11 @@ for color_number, label_location_list in label_locations_dict.items():
             cv.putText(final_image, str(color_number + 1), label_location, font, font_scale, font_color, font_thickness)
             # cv.circle(final_image, label_location_circ, 3, (0,0,255), -1)  # Highlight label location (uncomment to check placement)
 
-
 # Timer End
 end_time = time.time()
 total_time = (end_time-start_time)
 print(f'Script Complete. Total Run Time: {total_time:.4f} seconds')
+
 
 '''MATPLOTLIB DISPLAY'''
 # Used method from geeksforgeeks.org (https://www.geeksforgeeks.org/how-to-display-multiple-images-in-one-figure-correctly-in-matplotlib/)
@@ -351,15 +459,15 @@ plt.title("Original Image")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
-plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_LAB, cv.COLOR_LAB2RGB))
 plt.axis('off')
-plt.title(f"Image with Grouped Colors, Color Quantity: {color_quantity}")
+plt.title(f"CIELAB Image")
 
 # Add subplot in third position
 fig.add_subplot(rows, columns, 3)
-plt.imshow(cv.cvtColor(img_mask_dict[0], cv.COLOR_BGR2RGB))
+plt.imshow(cv.cvtColor(img_simplified, cv.COLOR_BGR2RGB))
 plt.axis('off')
-plt.title("Example of Image Mask")
+plt.title(f"Image with Grouped Colors, Color Quantity: {color_quantity}")
 
 
 # Add subplot in fourth position
@@ -368,19 +476,27 @@ plt.imshow(cv.cvtColor(final_image, cv.COLOR_BGR2RGB))
 plt.axis('off')
 plt.title("Final Paint-by-Number")
 
-# plt.show()  # display matplotlib figures 
+plt.show()  # display matplotlib figures 
 
 
 '''IMSHOW'''
-cv.imshow("Original Image", img)
+# cv.imshow("Original Image", img)
 # cv.imshow("Blurred Image", img_blur)
-cv.imshow("Simplified Image", img_simplified)
+# cv.imshow("Simplified Image", img_simplified)
 # cv.imshow("Simplified Image Edges", edges)
 # cv.imshow("Mask Image 1", img_mask_dict[0])
 # cv.imshow("Mask Image 1 Gray Scale", img_gray)
 # cv.imshow("Mask Image 1 Threshold", img_thresh)
 # cv.imshow("Mask Image 2", img_mask_dict[1])
 # cv.imshow("Mask Image 3", img_mask_dict[2])
-cv.imshow("Final Image", final_image)
+# cv.imshow("Final Image", final_image)
 
 cv.waitKey(0)  # keep images open until any key is pressed
+
+
+'''GENERATE PDF'''
+# Convert numpy array to .jpg format
+final_image = cv.cvtColor(final_image, cv.COLOR_BGR2RGB)
+final_image = Image.fromarray(final_image)
+final_image.save("./images/final_image.jpg")
+CreatePDF("./images/final_image.jpg", unique_base_colors)
