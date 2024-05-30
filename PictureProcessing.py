@@ -13,6 +13,7 @@ from PIL import Image
 from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
+
 '''TAKE PICTURE'''
 TAKING_PICTURE = False
 
@@ -83,23 +84,8 @@ start_time = time.time()
 # img = cv.imread("./images/mona_lisa.jpg")
 img = cv.imread("./images/capture.png")  # The video captured image
 
-# Convert image to CIELAB color space for processing
-img_LAB = cv.cvtColor(img, cv.COLOR_BGR2Lab)
 
-# Adjust L, a, and b channel values using Contrast Limited Adaptive Histogram Equalization (CLAHE)
-# The L channel represent lightness, a channel represents color spectrum from green to red, 
-# and b channel represent color spectrum from blue to yellow
-l, a, b = cv.split(img_LAB)
-clahe_l = cv.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
-clahe_a = cv.createCLAHE(clipLimit=1.0, tileGridSize=(3,3))
-clahe_b = cv.createCLAHE(clipLimit=2.0, tileGridSize=(3,3))
-l = clahe_l.apply(l)
-a = clahe_a.apply(a)
-b = clahe_b.apply(b)
-img_clahe = cv.merge((l,a,b))
-# img_clahe = cv.cvtColor(img_clahe, cv.COLOR_LAB2BGR)
-
-'''IMAGE-TO-IMAGE GENERATION'''
+'''AI IMAGE-TO-IMAGE GENERATION'''
 # Set to False if you don't want AI generated image
 USING_AI = False
 if not USING_AI:
@@ -170,7 +156,47 @@ if USING_AI:
         img = cv.cvtColor(img_generated, cv.COLOR_RGB2BGR)
 
 
+'''IMAGE PREPROCESSING'''
+# Convert image to CIELAB color space for processing
+img_LAB = cv.cvtColor(img, cv.COLOR_BGR2Lab)
+
+# It was found that the increasing lightness resulted in an image with more small sections which is undesirable
+# This section is being left in for possible future improvement
+# # Adjust L, a, and b channel values using Contrast Limited Adaptive Histogram Equalization (CLAHE)
+# # The L channel represent lightness, a channel represents color spectrum from green to red, 
+# # and b channel represent color spectrum from blue to yellow
+# l, a, b = cv.split(img_LAB)
+# clahe_l = cv.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
+# clahe_a = cv.createCLAHE(clipLimit=1.0, tileGridSize=(3,3))
+# clahe_b = cv.createCLAHE(clipLimit=2.0, tileGridSize=(3,3))
+# l = clahe_l.apply(l)
+# a = clahe_a.apply(a)
+# b = clahe_b.apply(b)
+# img_LAB = cv.merge((l,a,b))
+
+# Blur image to reduce noise for improved edge detection
+img_blur = cv.GaussianBlur(img_LAB,(7,7), sigmaX=30, sigmaY=30)
+
+# Reshape the image to be a 2D array with 3 channels. 
+    # The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
+    # each pixel is a row and each column represents a color (L, A, B).
+    # This allows the k-means cluster algorithm to cluster similar colors together.  
+img_reshape = img_blur.reshape((-1, 3))
+
+# Convert to float32 for floating-point calculations
+img_reshape = np.float32(img_reshape)
+
+
 '''COLOR QUANTIZATION'''
+# Define criteria, number of clusters(K), and apply kmeans()
+    # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
+    # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
+criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1)  # stop criteria, epsilon, max iterations
+color_quantity = 9 # number of clusters (or colors)
+ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
+
+
+'''FIND UNIQUE BASE COLORS'''
 # List of LAB values from croyola 12 pack
     # L [0, 100], A [-128, 127], B [-128, 127]
 color_list_LAB = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
@@ -183,20 +209,6 @@ color_list_LAB = [(26.691484008200362, 46.9566933495468, 35.213282818068606),
                   (11.087927325489154, 28.22859583509954, 16.116404226973568),
                   (1.7619641595337825, -0.9567793028630311, 11.8000166591868982),
                   (84.19846444703293, 0.004543913948662492, -0.008990380233764306)]
-
-# Convert from the typical LAB color range to the [0,255] range OpenCV uses
-def convert_LAB_to_opencv(color_list_LAB):
-    color_list_LAB_opencv = []
-    for color in color_list_LAB:
-        L, a, b = color
-        # Scale the L channel from [0, 100] to [0, 255]
-        L = L * 255 / 100
-        # Scale the a and b channels from [-128, 127] to [0, 255]
-        a = (a + 128) * 255 / (127 + 128)
-        b = (b + 128) * 255 / (127 + 128)
-        color_list_LAB_opencv.append((L, a, b))
-    return color_list_LAB_opencv
-color_list_LAB = convert_LAB_to_opencv(color_list_LAB)
 
 # List of BGR values from croyola 12 pack
 color_list_BGR = [(10, 10, 130),
@@ -215,86 +227,52 @@ color_list_BGR = [(10, 10, 130),
                   (6, 7, 2),
                   (210, 210, 210)]
 
-def find_most_similar_color(base_color, color_palette):
-    # Convert the target color to a numpy array
-    target_color = np.array(base_color)
+# Convert from the typical LAB color range to the [0,255] range OpenCV uses
+def convert_LAB_to_opencv(color_list_LAB):
+    color_list_LAB_opencv = []
+    for color in color_list_LAB:
+        L, a, b = color
+        # Scale the L channel from [0, 100] to [0, 255]
+        L = L * 255 / 100
+        # Scale the a and b channels from [-128, 127] to [0, 255]
+        a = (a + 128)
+        b = (b + 128)
+        color_list_LAB_opencv.append((L, a, b))
+    return color_list_LAB_opencv
+color_list_LAB_opencv = convert_LAB_to_opencv(color_list_LAB)
 
-    min_distance = float('inf')
-    most_similar_color = None
-
-    for color in color_palette:
-        # Convert the color to a numpy array
-        color = np.array(color)
-
-        # Calculate the Euclidean distance between the target color and the color
-        distance = np.sqrt(np.sum((target_color - color) ** 2))
-
-        # If the distance is smaller than the current minimum distance, update the minimum distance and the most similar color
-        if distance < min_distance:
-            min_distance = distance
-            most_similar_color = color
-
-    return most_similar_color
-
-def find_similar_color(base_colors, color_list):
-    new_base_colors = []
+def find_unique_base_colors(base_colors, color_list):
+    unique_base_colors = []
     for base_color in base_colors:
+        # Reset min_distance for each base_color
         min_distance = float('inf')
-        for target_color in color_list:
+        for unique_color in color_list:
             # Convert the color to a numpy array
             base_color = np.array(base_color)
-            target_color = np.array(target_color)
+            unique_color = np.array(unique_color)
 
             # Calculate the Euclidean distance between the target color and the color
-            distance = np.sqrt(np.sum((target_color - base_color) ** 2))
+            distance = np.sqrt(np.sum((unique_color - base_color) ** 2))
 
             # If the distance is smaller than the current minimum distance, update the minimum distance and the most similar color
             if distance < min_distance:
                 min_distance = distance
-                most_similar_color = target_color
+                most_similar_color = unique_color
                 # print("most similar", most_similar_color)
-        new_base_colors.append(most_similar_color)
-        color_list = [color for color in color_list if color not in most_similar_color]
-
-
+        unique_base_colors.append(most_similar_color)
+        # Remove the color that was just chosen as the most_similar_color
+        color_list = [color for color in color_list if color not in most_similar_color] 
     
-    return new_base_colors
+    return unique_base_colors
 
-
-
-# Blur image to reduce noise for improved edge detection
-img_blur = cv.GaussianBlur(img_LAB,(7,7), sigmaX=30, sigmaY=30)
-
-# Reshape the image to be a 2D array with 3 channels. 
-    # The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
-    # each pixel is a row and each column represents a color (R, G, B).
-    # This allows the k-means cluster algorithm to cluster similar colors together.  
-img_reshape = img_blur.reshape((-1, 3))
-
-# Convert to float32 for floating-point calculations
-img_reshape = np.float32(img_reshape)
-
-# Define criteria, number of clusters(K), and apply kmeans()
-    # cv.TERM_CRITERIA_EPS indicates that the algorithm should stop when the specified accuracy (epsilon) is reached.
-    # cv.TERM_CRITERIA_MAX_ITER indicates that the algorithm should stop after the specified number of iterations (max_iter) 1.
-criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1)  # stop criteria, epsilon, max iterations
-color_quantity = 9 # number of clusters (or colors)
-ret, label, base_colors = cv.kmeans(img_reshape, color_quantity, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
-
-print("base colors:", base_colors)
-print("base colors[0]:", type(base_colors[0]))
-
-base_colors = [find_similar_color(base_colors, color_list_LAB)]
-base_colors = np.array([np.array(base_color) for base_color in base_colors])[0]
-print("NEW base colors:", base_colors)
-print("NEW base colors[0]:", type(base_colors[0]))
-# base_colors = [find_most_similar_color(color, color_list_BGR) for color in base_colors]
-base_colors = np.uint8(base_colors)  # Values of the final clusters
-img_simplified = base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
+unique_base_colors = [find_unique_base_colors(base_colors, color_list_LAB_opencv)]
+unique_base_colors = np.array([np.array(base_color) for base_color in unique_base_colors])[0]  # convert to numpy array
+unique_base_colors = np.uint8(unique_base_colors) 
+img_simplified = unique_base_colors[label.flatten()]  # Replace each pixel with its corresponding base color
 img_simplified = img_simplified.reshape((img.shape))
-img_simplified = cv.cvtColor(img_simplified, cv.COLOR_LAB2BGR)
+img_simplified = cv.cvtColor(img_simplified, cv.COLOR_LAB2BGR) 
 
-def LAB_to_bgr(LAB_color):
+def LAB_to_BGR(LAB_color):
     # Convert the LAB color to a 2D array
     LAB_color_2d = np.uint8([[LAB_color]])
 
@@ -302,20 +280,19 @@ def LAB_to_bgr(LAB_color):
     bgr_color = cv.cvtColor(LAB_color_2d, cv.COLOR_LAB2BGR)
 
     return bgr_color[0][0]
+unique_base_colors = [LAB_to_BGR(LAB_color) for LAB_color in unique_base_colors]  # convert unique_base_colors to BGR for color masking operations
 
-base_colors = [LAB_to_bgr(LAB_color) for LAB_color in base_colors] # convert base_colors to BGR color masking operations
-base_colors = np.array([np.array(base_color) for base_color in base_colors])
-print("base colors:", base_colors)
+unique_base_colors = np.array([np.array(base_color) for base_color in unique_base_colors])
 
 
 '''COLOR MASKING'''
 # For each base_color, calculate max and min values to use as mask 
 tol = 0  # tolerance 
 bgr_color_limit_dict = {}
-for i, bgr_color in enumerate(base_colors):
-    b_val = base_colors[i][0]
-    g_val = base_colors[i][1]
-    r_val = base_colors[i][2]
+for i, bgr_color in enumerate(unique_base_colors):
+    b_val = unique_base_colors[i][0]
+    g_val = unique_base_colors[i][1]
+    r_val = unique_base_colors[i][2]
     bgr_color_limit_dict[i] = np.array([b_val - tol, g_val - tol, r_val - tol]), np.array([b_val + tol, g_val + tol, r_val + tol])
 
 # Create masks
@@ -521,4 +498,4 @@ cv.waitKey(0)  # keep images open until any key is pressed
 final_image = cv.cvtColor(final_image, cv.COLOR_BGR2RGB)
 final_image = Image.fromarray(final_image)
 final_image.save("./images/final_image.jpg")
-CreatePDF("./images/final_image.jpg", base_colors)
+CreatePDF("./images/final_image.jpg", unique_base_colors)
