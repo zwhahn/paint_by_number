@@ -263,7 +263,7 @@ def find_similar_color(base_colors, color_list):
 
 
 # Blur image to reduce noise for improved edge detection
-img_blur = cv.GaussianBlur(img_clahe,(7,7), sigmaX=30, sigmaY=30)
+img_blur = cv.GaussianBlur(img_LAB,(7,7), sigmaX=30, sigmaY=30)
 
 # Reshape the image to be a 2D array with 3 channels. 
     # The value -1 means the number of rows needed is calculated automatically based on the colomns. By reshaping to a 2D array, 
@@ -304,6 +304,7 @@ def LAB_to_bgr(LAB_color):
     return bgr_color[0][0]
 
 base_colors = [LAB_to_bgr(LAB_color) for LAB_color in base_colors] # convert base_colors to BGR color masking operations
+base_colors = np.array([np.array(base_color) for base_color in base_colors])
 print("base colors:", base_colors)
 
 
@@ -481,9 +482,9 @@ plt.title("Original Image")
 
 # Add subplot in second position
 fig.add_subplot(rows, columns, 2)
-plt.imshow(cv.cvtColor(img_clahe, cv.COLOR_LAB2RGB))
+plt.imshow(cv.cvtColor(img_LAB, cv.COLOR_LAB2RGB))
 plt.axis('off')
-plt.title(f"CLAHE Image")
+plt.title(f"CIELAB Image")
 
 # Add subplot in third position
 fig.add_subplot(rows, columns, 3)
