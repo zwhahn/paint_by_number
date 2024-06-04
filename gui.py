@@ -2,6 +2,7 @@ import tkinter as tk
 import cv2 as cv
 from PIL import Image, ImageTk
 import time
+from PictureProcessing import PaintByNumber
 
 class WebcamApp:
     def __init__(self, window):
@@ -42,7 +43,6 @@ class WebcamApp:
 
             self.canvas.create_image(0,0,image=self.photo, anchor=tk.NW)
 
-
             self.window.after(10, self.update_webcam)
 
             # Once the countdown is over, the image is captured and saved to the images folder
@@ -52,11 +52,20 @@ class WebcamApp:
                 cv.imwrite('./images/capture.png', self.frame)  # overwrites the last captured image
                 self.canvas.delete("all")
                 self.picture_taken = True
+                self.picture_processing()
     
     
     def capture_image(self):
         self.start_time = time.time()
 
+    def picture_processing(self):
+        PaintByNumber
+        print("end")
+        final_img = './images/final_image.jpg'
+        final_img = ImageTk.PhotoImage(file = final_img)
+        self.canvas = tk.Canvas(self.window, width = 640, height=480)
+        self.canvas.pack()
+        self.canvas.create_image(0,0,image=final_img, anchor = tk.NW)
          
 
 root = tk.Tk()
