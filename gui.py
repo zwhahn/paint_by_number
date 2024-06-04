@@ -3,10 +3,11 @@ import cv2 as cv
 from PIL import Image, ImageTk
 
 vid = cv.VideoCapture(0)
+vid.set(cv.CAP_PROP_FRAME_WIDTH, 3000)
 
 app = Tk()
 app.attributes('-fullscreen',True)
-app.bind('<Escape>', lambda e: app.quit())
+app.bind('<Escape>', lambda e: app.quit())  # close app with esc
 
 label_widget = Label(app)
 label_widget.pack()
@@ -16,13 +17,10 @@ def open_camera():
     _, frame = vid.read()
 
     opencv_image = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-
     captured_image = Image.fromarray(opencv_image)
-
     photo_image = ImageTk.PhotoImage(image=captured_image)
 
     label_widget.photo_image = photo_image
-
     label_widget.configure(image = photo_image)
 
     label_widget.after(10, open_camera)
