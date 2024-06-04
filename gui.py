@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 vid = cv.VideoCapture(0)
 
 app = Tk()
+app.attributes('-fullscreen',True)
 app.bind('<Escape>', lambda e: app.quit())
 
 label_widget = Label(app)
