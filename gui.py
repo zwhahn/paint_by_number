@@ -2,7 +2,7 @@ import tkinter as tk
 import cv2 as cv
 from PIL import Image, ImageTk
 import time
-from PictureProcessing import PaintByNumber
+from PictureProcessing import PaintByNumber, PrintPDF
 
 class WebcamApp:
     def __init__(self, window):
@@ -22,7 +22,7 @@ class WebcamApp:
         self.y_center = int(self.vid.get(cv.CAP_PROP_FRAME_HEIGHT)/2)
 
         self.capture_button = tk.Button(window, text = "Capture", command = self.capture_image)
-        self.capture_button.grid(row=1, column=0)
+        self.capture_button.grid(row=1, column=0, columnspan=2)
 
         self.canvas_created = False
         self.update_webcam()
@@ -30,7 +30,7 @@ class WebcamApp:
     def update_webcam(self):
         if self.canvas_created == False:
             self.canvas = tk.Canvas(self.window, width = 640, height=480)
-            self.canvas.grid(row=0, column=0)
+            self.canvas.grid(row=0, column=0, columnspan=2)
             self.canvas_created = True  # Stop multiple canvas' from being created
         
         if self.picture_taken == False:
@@ -70,17 +70,21 @@ class WebcamApp:
         self.final_img_file = './images/final_image.jpg'
         self.final_img = ImageTk.PhotoImage(Image.open(self.final_img_file))
         self.canvas = tk.Canvas(self.window, width = 640, height=480)
-        self.canvas.grid(row=0, column=0)
+        self.canvas.grid(row=0, column=0, columnspan=2)
         self.canvas.create_image(0,0,image=self.final_img, anchor = tk.NW)
 
         # Create 'Restart' and 'Print Button'
         self.restart_button = tk.Button(self.window, text = "Take Another Picture!", 
                                         command = self.restart)
         self.restart_button.grid(row=1, column=0)
+        self.print_button = tk.Button(self.window, text = "Print!", 
+                                        command = self.print_pdf)
+        self.print_button.grid(row=1, column=1)
 
     def restart(self):
-        # Remove 'Restart' button and final image
+        # Remove 'restart' and 'print' button and final image
         self.restart_button.destroy()  # Remove 'capture' button
+        self.print_button.destroy()
         self.canvas.destroy()
 
         # Reset variables to run camera feed
@@ -91,9 +95,12 @@ class WebcamApp:
 
         # Add back the capture button
         self.capture_button = tk.Button(self.window, text = "Capture", command = self.capture_image)
-        self.capture_button.grid(row=1, column=0)
+        self.capture_button.grid(row=1, column=0, columnspan=2)
         
-        self.update_webcam()         
+        self.update_webcam()   
+
+    def print_pdf(self):
+        PrintPDF()      
 
 root = tk.Tk()
 root.bind('<Escape>', lambda e: root.quit())  # Kill loop with escape button
