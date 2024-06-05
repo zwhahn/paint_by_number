@@ -14,6 +14,7 @@ class WebcamApp:
         self.remaining_time = None
         self.start_time = None
         self.picture_taken = False
+        self.countdown = 3
         self.vid = cv.VideoCapture(0)
 
         # Calculate center of frame for countdown position
@@ -33,7 +34,7 @@ class WebcamApp:
             ret, self.frame = self.vid.read()
 
             if self.start_time is not None:  # Dont add text to image until timer has started
-                self.remaining_time = int(3 - ((time.time() - self.start_time) //1))
+                self.remaining_time = int(self.countdown - ((time.time() - self.start_time) //1))
                 if self.remaining_time > 0:  # If there is no remaining time than we should not alter the frame, otherwise add countdown
                     cv.putText(self.frame, str(self.remaining_time), (self.y_center, self.x_center), cv.FONT_HERSHEY_SIMPLEX, 7, (0, 0, 0), 20, cv.FILLED) 
         
@@ -59,7 +60,7 @@ class WebcamApp:
         self.start_time = time.time()
 
     def picture_processing(self):
-        PaintByNumber
+        PaintByNumber()
         print("end")
         final_img = './images/final_image.jpg'
         final_img = ImageTk.PhotoImage(file = final_img)
