@@ -21,17 +21,19 @@ class WebcamApp:
         self.x_center = int(self.vid.get(cv.CAP_PROP_FRAME_WIDTH)/2)
         self.y_center = int(self.vid.get(cv.CAP_PROP_FRAME_HEIGHT)/2)
 
-        self.canvas = tk.Canvas(window, width = 640, height=480)
-        self.canvas.grid(row=0, column=0)
-
         self.capture_button = tk.Button(window, text = "Capture", command = self.capture_image)
         self.capture_button.grid(row=1, column=0)
 
+        self.canvas_created = False
         self.update_webcam()
 
     def update_webcam(self):
+        if self.canvas_created == False:
+            self.canvas = tk.Canvas(self.window, width = 640, height=480)
+            self.canvas.grid(row=0, column=0)
+        
         if self.picture_taken == False:
-            ret, self.frame = self.vid.read()
+            _, self.frame = self.vid.read()
 
             if self.start_time is not None:  # Dont add text to image until timer has started
                 self.remaining_time = int(self.countdown - ((time.time() - self.start_time) //1))
@@ -70,6 +72,8 @@ class WebcamApp:
          
 
 root = tk.Tk()
-root.bind('<Escape>', lambda e: root.quit()) 
+root.bind('<Escape>', lambda e: root.quit())  # Kill loop with escape button
+root.protocol('WM_DELETE_WINDOW', lambda : root.quit())    # Kill loop with [X] button (top left)
 app = WebcamApp(root)
 root.mainloop()
+print("Loop done")
