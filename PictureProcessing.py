@@ -500,3 +500,6 @@ def PaintByNumber():
     final_image = Image.fromarray(final_image)
     final_image.save("./images/final_image.jpg")
     CreatePDF("./images/final_image.jpg", unique_base_colors)
+
+def PrintPDF():
+    pass
