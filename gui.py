@@ -62,13 +62,14 @@ class WebcamApp:
     def picture_processing(self):
         PaintByNumber()
         print("end")
-        final_img = './images/final_image.jpg'
-        final_img = ImageTk.PhotoImage(file = final_img)
-        self.canvas = tk.Canvas(self.window, width = 640, height=480)
+        self.final_img_file = './images/final_image.jpg'
+        self.final_img = ImageTk.PhotoImage(Image.open(self.final_img_file))
+        self.canvas = tk.Canvas(self.window, width = 640, height=480, bg = 'red')
         self.canvas.pack()
-        self.canvas.create_image(0,0,image=final_img, anchor = tk.NW)
+        self.canvas.create_image(0,0,image=self.final_img, anchor = tk.NW)
          
 
 root = tk.Tk()
+root.bind('<Escape>', lambda e: root.quit()) 
 app = WebcamApp(root)
 root.mainloop()
