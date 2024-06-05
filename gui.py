@@ -31,6 +31,7 @@ class WebcamApp:
         if self.canvas_created == False:
             self.canvas = tk.Canvas(self.window, width = 640, height=480)
             self.canvas.grid(row=0, column=0)
+            self.canvas_created = True  # Stop multiple canvas' from being created
         
         if self.picture_taken == False:
             _, self.frame = self.vid.read()
@@ -50,26 +51,49 @@ class WebcamApp:
 
             # Once the countdown is over, the image is captured and saved to the images folder
             if self.remaining_time == 0:
-                print("Image Captured!")
                 self.picture_taken = True
+                print("Image Captured!")
                 cv.imwrite('./images/capture.png', self.frame)  # overwrites the last captured image
                 self.canvas.destroy()
-                self.picture_taken = True
                 self.picture_processing()
     
     
     def capture_image(self):
         self.start_time = time.time()
 
+
     def picture_processing(self):
-        PaintByNumber()
-        print("end")
+        PaintByNumber()  # Run paint-by-number function
+        self.capture_button.destroy()  # Remove 'capture' button
+
+        # Upload final image and display
         self.final_img_file = './images/final_image.jpg'
         self.final_img = ImageTk.PhotoImage(Image.open(self.final_img_file))
         self.canvas = tk.Canvas(self.window, width = 640, height=480)
         self.canvas.grid(row=0, column=0)
         self.canvas.create_image(0,0,image=self.final_img, anchor = tk.NW)
-         
+
+        # Create 'Restart' and 'Print Button'
+        self.restart_button = tk.Button(self.window, text = "Take Another Picture!", 
+                                        command = self.restart)
+        self.restart_button.grid(row=1, column=0)
+
+    def restart(self):
+        # Remove 'Restart' button and final image
+        self.restart_button.destroy()  # Remove 'capture' button
+        self.canvas.destroy()
+
+        # Reset variables to run camera feed
+        self.remaining_time = None
+        self.start_time = None
+        self.picture_taken = False
+        self.canvas_created = False
+
+        # Add back the capture button
+        self.capture_button = tk.Button(self.window, text = "Capture", command = self.capture_image)
+        self.capture_button.grid(row=1, column=0)
+        
+        self.update_webcam()         
 
 root = tk.Tk()
 root.bind('<Escape>', lambda e: root.quit())  # Kill loop with escape button
