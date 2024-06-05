@@ -502,4 +502,5 @@ def PaintByNumber():
     CreatePDF("./images/final_image.jpg", unique_base_colors)
 
 def PrintPDF():
+    print("Printed PDF")
     pass
