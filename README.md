@@ -3,22 +3,23 @@
 ## Table of Contents
 - [Overview](#overview)
 - [How it Works](#how-it-works)
-- [How to Run the Script](#how-to-run-the-script)
+- [How to Run](#how-to-run)
 - [Example Outputs](#example-outputs)
 - [Future Improvements](#future-improvements)
 
 ## Overview
-This project is a Python script that transforms any image into a paint-by-number style image primarily using the OenCV library. Additionally, the Stability AI platform is integrated to allow the user to perform Image-to-Image generation based on the original input image. Using this AI generation is optional. 
+This project was used to explore OpenCV, Image-to-Image generate, and hone my existing Python skills. It transforms any image into a paint-by-number image. The Stability AI platform is integrated to allow the user to perform Image-to-Image generation based on the original input image. Using this AI generation is not essential for the main functionality. 
 
 ## How it Works
-The script has 7 main sections:
 1. [Image Input](#image-input)
 2. [Image-to-Image Generation (optional)](#image-to-image-generation-optional)
 3. [Color Quantization](#color-quantization)
 4. [Color Masking](#color-masking)
 5. [Finding Contours and Label Locations](#finding-contours-and-label-locations)
 6. [Combining Masks and Drawing Contours/Labels](#combining-masks-and-drawing-contourslabels)
-7. [Image Display](#image-display)
+7. [PDF Generation](#pdf-generation)
+8. [Printing](#printing)
+9. [GUI](#gui)
 
 ### Image Input
 Images are loaded using cv.imread("/file_path"). Example images have been stored in the 'images' folder and can be easily swapped by uncommenting the corresponding image line.
@@ -62,33 +63,46 @@ Next, the contours are drawn on top of the *final_image* to divide the region be
 
 Finally, the *label_locations_dict* is looped through and drawn on the image. There is a check to make sure only white areas are being labeled (regions with color don't need to be colored in by the user).
 
-### Image Display
-There are 2 methods to display the images. The first is matplotlib. matplotlib can be used to display images next to each other on the same plot but it takes a little longer to open.
+### PDF Generation
+The PDF is generated and formatted in the PrinterFormat.py file. The final image is passed in to this script, along with the base color. The image is centered on the page and the 9 colors are displayed in a 3x3 grid. The PA logo and 2024 SF Design week logo are placed in the bottom right corner for branding purporses.
 
-The second method OpenCV's *imshow*. This displays each image in it's own window but opens more quickly.
+### Printing
+Printing is executed using the win23printing library. It will always print to the computers default printer so make sure you know what that is for your computer.
 
-## How to Run the Script
+### GUI
+The GUI is created using the TKinter library. It has 5 main functions:
+1. Displays computer camera feed
+2. Capture button- allows user to capture current image and triggers the Apint-By-Number generation
+3. Display the paint-by-number version
+4. Print button- user is able to print the paint-by-number image PDF (formatted in the PrinterFormat.py script), waits 2.5 seconds, then returns to the camera feed
+5. Try again button- returns to the camera feed
 
+The GUI automatically enters full-screen mode but can be closed using the ESC key. **The GUI was formatted on the lab computer but displays differently on different computers.**
+
+## How to Run
 1. Navigate to your working directory and clone the repository to your local device using `git clone ssh://clone.link.here`
-2. While still in the working directory, install all dependencies using the *requirements.txt* file: `pip install -r requirements.txt`
+2. (Optional but recommended) Create a virtual environment. A YouTube tutorial on how to do this can be found here: [The Complete Guide to Python Virtual Environments](https://youtu.be/KxvKCSwlUv8?si=IlB9c20-qzFokLjh)  
+3. While still in the working directory, install all dependencies using the *requirements.txt* file: `pip install -r requirements.txt`. **IMPORTANT NOTE- The dependencies have only been tested on Python 3.11.7. If the requirements fail to install check Python compatability. Here is a tutorial on how to change the Python version being used in your viurtual environment: [How to Use Different Python Version in VirtualEnv (2023)](https://www.youtube.com/watch?v=sgSg10kjZxw)**
+4. If all dependencies are correctly installed, the *gui.py* script can be run.
 
-*PictureProcessing.py* should now be able to run **without AI (*USE_AI = False*)**. In order to use the AI image generation, continue following these instructions.
+The AI Image generation is turned off by default. In order to use the AI generation, continue following these instructions: 
 
-3. Head to [Stability AI's API key manager](https://platform.stability.ai/account/keys). If you do not have an account, you will need to create one.
-4. Create an API key. 
-5. Create a blank .txt file and copy the provided API key into this file. **Save this file locally, you do not want other people using your credits.**
-6. Update the following line of code in *PictureProcessing.py* with the file path to the .txt file that now has your API key:
+5. Head to [Stability AI's API key manager](https://platform.stability.ai/account/keys). If you do not have an account, you will need to create one.
+6. Create an API key. 
+7. Create a blank .txt file and copy the provided API key into this file. **Save this file locally, you do not want other people using your credits.**
+8. Update the following line of code in *PictureProcessing.py* with the file path to the .txt file that now has your API key:
 ```
 # Replace with your correct file path
 api_token_file = open(r"your/file/path.txt") 
 ```
-Done! The script should now be able to run with AI image-to-image generation. You can change the prompt however you like. 
+9. Check that *USING_AI = True*
+
+Done! The script should now be able to run with AI image-to-image generation. You can change the prompt however you like. *There is currently no way to turn off/on the AI generation through the GUI*
 
 **Important Note: Stability AI provides only 25 free tokens to a new account (unclear how many images this is). Once this limit is hit, you will not be able to use the AI feature unless you pay for more tokens. [Stability AI Token Pricing](https://platform.stability.ai/account/credits)**
 
 
-## Example Outputs
-
+## Example Image Outputs
 
 ### Without AI
 
@@ -99,6 +113,10 @@ Done! The script should now be able to run with AI image-to-image generation. Yo
 **Prompt: "In the style of vincent van gogh's Sunflowers, beautiful paint strokes, oil painting, van gogh's colors, portrait, paint strokes visible"**
 
 ![Output Example: Brad Pitt in the style of Vincent Van Gogh](./process_pictures/ExampleOutput_BradPittVincentVanGogh.png)
+
+
+## Example PDF Output
+![Output Example: Generated PDF](./process_pictures/ExampleOutput_PDF.png)
 
 ## Future Improvements
 - Integrate with Raspberry Pi and Pi camera, allowing a user to take a picture of themselves (or anything) and generate a paint by number of that instantly.
