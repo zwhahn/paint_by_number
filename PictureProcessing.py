@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 import imutils
 import time
 from PrinterFormat import CreatePDF
+from win32printing import Printer
+import win32api
 
 # AI Imports
 import io
@@ -502,5 +504,11 @@ def PaintByNumber():
     CreatePDF("./images/final_image.jpg", unique_base_colors)
 
 def PrintPDF():
-    print("Printed PDF")
-    pass
+    try: 
+        printer_name = Printer.get_default_printer_name()
+        print("Printer:", printer_name)
+        print("Printing...")
+        # Requires PDF reader installed on computer to work properly
+        win32api.ShellExecute(0, "print", "PAintByNumber.pdf", '/d:"%s"' % printer_name, ".", 0)
+    except:
+        print("Unable to Print")
