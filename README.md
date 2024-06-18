@@ -119,12 +119,8 @@ Done! The script should now be able to run with AI image-to-image generation. Yo
 ![Output Example: Generated PDF](./process_pictures/ExampleOutput_PDF.png)
 
 ## Future Improvements
-- Integrate with Raspberry Pi and Pi camera, allowing a user to take a picture of themselves (or anything) and generate a paint by number of that instantly.
-- Connect with printer and change output file type. This will allow a user to print out the paint by number image easily.
-- Add a set color pallete that the image is grouped in. This will allow the purchase of a kit of colors and ensure the output image uses colors from that kit. This makes much more realistic for coloring in purposes. 
-- Display color pallete and associate label number for each color below 
-- Create a GUI for easy user experience. The user should be able to:
-    - Take picture (and retake if desired)
-    - Select AI filter and display the image before continuing (and regenerate if desired)
-    - Specify number of colors or complexity of output image
-    - Print paint-by-number image
+- GUI functionality updates:
+    - Add AI on/off button
+    - Add AI prompt input
+- Identify faces/people and group them with more detail than the background
+- Rather than pre-filling small sections, remove them completely (ex. eroding, dilating...)
