@@ -4,11 +4,12 @@
 - [Overview](#overview)
 - [How it Works](#how-it-works)
 - [How to Run](#how-to-run)
-- [Example Outputs](#example-outputs)
+- [Example Image Outputs](#example-image-outputs)
+- [Example PDF Output](#example-image-output)
 - [Future Improvements](#future-improvements)
 
 ## Overview
-This project was used to explore OpenCV, Image-to-Image generate, and hone my existing Python skills. It transforms any image into a paint-by-number image. The Stability AI platform is integrated to allow the user to perform Image-to-Image generation based on the original input image. Using this AI generation is not essential for the main functionality. 
+This project was used to explore OpenCV, image-to-image generation, and hone existing Python skills. It transforms any image into a paint-by-number image. The Stability AI platform is integrated to allow the user to perform Image-to-Image generation based on the original input image. Using this AI generation is not essential for the main functionality. 
 
 ## How it Works
 1. [Image Input](#image-input)
