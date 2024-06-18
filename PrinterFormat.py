@@ -4,6 +4,9 @@ from reportlab.lib.units import inch
 from reportlab.graphics import shapes
 
 pa_logo_path = "./images/pa_logo.png"
+sfdw_logo_path = "./images/SFDW_Logo_2024.png"
+img_width = None
+img_height = 0.4*inch
 color_square_size = 0.7*inch # [inch]
 
 def CreatePDF(img, base_colors):
@@ -14,7 +17,10 @@ def CreatePDF(img, base_colors):
     canvas.drawImage(img, 30, 310, width=550, preserveAspectRatio=True)
 
     # Add PA logo 
-    canvas.drawImage(pa_logo_path, 7.1*inch, 0.3*inch, preserveAspectRatio=True)
+    canvas.drawImage(pa_logo_path, 7.4*inch, 0.3*inch, height = img_height, preserveAspectRatio=True)
+
+    # Add SFDW logo
+    canvas.drawImage(sfdw_logo_path, 4.2*inch, 0.3*inch, height = img_height, preserveAspectRatio=True)
 
     # Add color/number legend
     for num in range(len(base_colors)):
