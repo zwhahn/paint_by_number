@@ -4,7 +4,7 @@ from reportlab.lib.units import inch
 from reportlab.graphics import shapes
 
 pa_logo_path = "./images/pa_logo.png"
-sfdw_logo_path = "./images/footer-sfdw-removebg-preview.png"
+sfdw_logo_path = "./images/SFDW_Logo_2024.png"
 img_width = None
 img_height = 0.4*inch
 color_square_size = 0.7*inch # [inch]
